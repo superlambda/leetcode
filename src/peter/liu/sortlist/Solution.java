@@ -8,20 +8,75 @@ package peter.liu.sortlist;
  */
 public class Solution {
 	public ListNode sortList(ListNode head) {
-
+		if (head == null) {
+			return null;
+		}
+		return binarySort(head);
 	}
-}
 
-/**
- * Definition for singly-linked list.
- */
+	private ListNode binarySort(ListNode head) {
+		ListNode leftNode=removeFrist2Node(head);
+		head=sort(head);
+		while(leftNode!=null){
+			ListNode iterator=leftNode;
+			leftNode=removeFrist2Node(leftNode);
+			head=merge(head, sort(iterator));
+		}
+		return head;
+	}
+	private ListNode removeFrist2Node(ListNode head){
+		if (head.next != null && head.next.next != null) {
+			ListNode iterator = head.next.next;
+			head.next.next = null;
+			return iterator;
+		}
+		return null;
+	}
 
-class ListNode {
-	int val;
-	ListNode next;
+	private ListNode sort(ListNode head) {
+		if (head.next != null && head.next.val < head.val) {
+			ListNode temp = head.next;
+			temp.next = head;
+			head.next = null;
+			head = temp;
+		}
+		return head;
+	}
 
-	ListNode(int x) {
-		val = x;
-		next = null;
+	private ListNode merge(ListNode first, ListNode second) {
+		if(second.next==null&&second.val<=first.val){
+			second.next=first;
+			return second;
+		}else if(second.next!=null&&second.next.val<=first.val){
+			second.next.next=first;
+			return second;
+		}
+		ListNode mergedHead = null;
+		if (first.val < second.val) {
+			mergedHead = first;
+			first = first.next;
+		} else {
+			mergedHead = second;
+			second = second.next;
+		}
+		mergedHead.next = null;
+		ListNode iterator = mergedHead;
+		while (first != null && second != null) {
+			if (first.val < second.val) {
+				iterator.next = first;
+				first = first.next;
+			} else {
+				iterator.next = second;
+				second = second.next;
+			}
+			iterator = iterator.next;
+		}
+		if (first != null) {
+			iterator.next = first;
+		}
+		if (second != null) {
+			iterator.next = second;
+		}
+		return mergedHead;
 	}
 }
