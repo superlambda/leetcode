@@ -8,7 +8,7 @@ public class SolutionTest {
 
 	@Test
 	public void testSortList() {
-	    SolutionO s=new SolutionO();
+	    Solution s=new Solution();
 		ListNode node=null;
 		assertEquals(s.sortList(node),null);
 		node=new ListNode(5);
