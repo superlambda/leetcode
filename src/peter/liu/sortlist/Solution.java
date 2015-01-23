@@ -8,7 +8,7 @@ package peter.liu.sortlist;
  */
 public class Solution {
     public ListNode sortList(ListNode head) {
-        int length=getLengthOfList (head);
+        int length=getLengthOfList(head);
         return binarySort(head,length);
     }
     
