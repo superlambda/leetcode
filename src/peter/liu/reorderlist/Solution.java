@@ -1,8 +1,8 @@
 package peter.liu.reorderlist;
 
 /**
- * Given a singly linked list L: L0â†’L1â†’â€¦â†’Ln-1â†’Ln, reorder it to:
- * L0â†’Lnâ†’L1â†’Ln-1â†’L2â†’Ln-2â†’â€¦
+ * Given a singly linked list L: L0¡úL1¡ú¡­¡úLn-1¡úLn, reorder it to:
+ * L0¡úLn¡úL1¡úLn-1¡úL2¡úLn-2¡ú¡­
  * 
  * You must do this in-place without altering the nodes' values.
  * 
@@ -18,18 +18,20 @@ public class Solution {
 		if (length <= 2) {
 			return;
 		}
-		int halfLength = length / 2;
-		ListNode iterator = splitList(head, halfLength);
-		ListNode secondHead=iterator;
-		while (iterator != null) {
-			ListNode next = iterator.next;
-			if (next != null) {
-				iterator=next.next;
-				next.next=secondHead;
-				secondHead=next;
-			}
+		int halfLength = length / 2+1;
+		ListNode secondHead = secondHalfList(head, halfLength);
+		
+		ListNode iterator=head;
+		int numberToAdd=length-halfLength;
+		while (numberToAdd>0) {
+			ListNode temp = iterator.next;
+			iterator.next = secondHead;
+			secondHead=secondHead.next;
+			iterator = iterator.next;
+			iterator.next = temp;
+			iterator = iterator.next;
+			numberToAdd--;
 		}
-		merge(head, iterator);
 	}
 
 	private int getLengthOfList(ListNode head) {
@@ -42,7 +44,7 @@ public class Solution {
 		return length;
 	}
 
-	private ListNode splitList(ListNode head, int halfLength) {
+	private ListNode secondHalfList(ListNode head, int halfLength) {
 		ListNode iterator = head;
 		while (halfLength > 0) {
 			if (halfLength != 1) {
@@ -54,21 +56,18 @@ public class Solution {
 			}
 			halfLength--;
 		}
-		return iterator;
-	}
-	private ListNode merge(ListNode first, ListNode second) {
-		ListNode mergedHead = first;
-		first = first.next;;
-		ListNode iterator = mergedHead;
-		while (first != null && second != null) {
-			iterator.next = second;
-			second = second.next;
-			iterator.next = first;
-			first = first.next;
+		ListNode secondListHead=iterator;
+		iterator=iterator.next;
+		secondListHead.next=null;
+		while(iterator!=null){
+			ListNode temp=iterator;
+			iterator=iterator.next;
+			temp.next=secondListHead;
+			secondListHead=temp;
 		}
-		iterator.next = (first != null) ? first : second;
-		return mergedHead;
+		return secondListHead;
 	}
+	
 }
 
 /**
