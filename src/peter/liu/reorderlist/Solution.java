@@ -1,8 +1,8 @@
 package peter.liu.reorderlist;
 
 /**
- * Given a singly linked list L: L0¡úL1¡ú¡­¡úLn-1¡úLn, reorder it to:
- * L0¡úLn¡úL1¡úLn-1¡úL2¡úLn-2¡ú¡­
+ * Given a singly linked list L: L0-->L1-->Ln-1-->Ln, reorder it to:
+ * L0-->Ln-->L1-->Ln-1-->L2-->Ln-2..
  * 
  * You must do this in-place without altering the nodes' values.
  * 
@@ -56,6 +56,7 @@ public class Solution {
 			}
 			halfLength--;
 		}
+		//reverse the second half list.
 		ListNode secondListHead=iterator;
 		iterator=iterator.next;
 		secondListHead.next=null;
