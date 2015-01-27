@@ -1,7 +1,5 @@
 package peter.liu.linkedlistcycle;
 
-import java.util.HashSet;
-import java.util.Set;
 
 
 /**
@@ -13,16 +11,33 @@ import java.util.Set;
  *
  */
 public class Solution {
+//	public boolean hasCycle(ListNode head) {
+//		Set<ListNode> set=new HashSet<>(128);
+//		ListNode iterator=head;
+//		while(iterator!=null){
+//			if(!set.contains(iterator)){
+//				set.add(iterator);
+//				iterator=iterator.next;
+//			}else{
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	
 	public boolean hasCycle(ListNode head) {
-		Set<ListNode> set=new HashSet<>();
-		ListNode iterator=head;
-		while(iterator!=null){
-			if(!set.contains(iterator)){
-				set.add(iterator);
-				iterator=iterator.next;
-			}else{
+		if(head==null||head.next==null){
+			return false;
+		}
+		ListNode slower=head;
+		ListNode faster=head;
+		while(faster!=null&&faster.next!=null){
+			slower=slower.next;
+			faster=faster.next.next;
+			if(slower==faster){
 				return true;
 			}
+			
 		}
 		return false;
 	}
