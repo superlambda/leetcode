@@ -1,5 +1,6 @@
 package peter.liu.singlenumber;
 
+
 /**
  * Given an array of integers, every element appears twice except for one. Find
  * that single one.
@@ -12,7 +13,11 @@ package peter.liu.singlenumber;
  */
 public class Solution {
 	public int singleNumber(int[] A) {
-
+		int result = 0; 
+        for (int i : A){
+        	result ^= i ; 
+        }
+        return result ; 
 	}
 
 }
