@@ -12,23 +12,32 @@ import java.util.List;
  */
 public class Solution {
 	public List<List<Integer>> pathSum(TreeNode root, int sum) {
-
+		List<List<Integer>> pathList = new LinkedList<>();
+		if (root != null) {
+			preOrderTraverse(root, 0, sum, pathList, new LinkedList<>());
+		}
+		return pathList;
 	}
 
-	private List<List<Integer>> preOrderTraverse(TreeNode iterator,
-			int pathSum, int sum) {
-		if (iterator == null) {
-			return null;
+	private void preOrderTraverse(TreeNode iterator, int pathSum, int sum,
+			List<List<Integer>> pathList, List<Integer> path) {
+		pathSum += iterator.val;
+		path.add(iterator.val);
+		if (iterator.left == null && iterator.right == null) {
+			if (pathSum == sum) {
+				pathList.add(path);
+			}
+			return;
 		}
-		List<Integer> list = new LinkedList<>();
-		list.add(iterator.val);
-		if (pathSum == sum && iterator.left == null && iterator.right == null) {
-			return true;
-		}
-		if (preOrderTraverse(iterator.left, pathSum, sum)) {
-			return true;
-		} else {
-			return preOrderTraverse(iterator.right, pathSum, sum);
+		if (iterator.left != null && iterator.right != null) {
+			preOrderTraverse(iterator.left, pathSum, sum, pathList,
+					new LinkedList<Integer>(path));
+			preOrderTraverse(iterator.right, pathSum, sum, pathList,
+					new LinkedList<Integer>(path));
+		} else if (iterator.left != null) {
+			preOrderTraverse(iterator.left, pathSum, sum, pathList, path);
+		} else if (iterator.right != null) {
+			preOrderTraverse(iterator.right, pathSum, sum, pathList, path);
 		}
 	}
 }
