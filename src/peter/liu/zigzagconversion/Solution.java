@@ -1,7 +1,5 @@
 package peter.liu.zigzagconversion;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The string "PAYPALISHIRING" is written in a zigzag pattern on a given number
@@ -24,33 +22,36 @@ import java.util.Map;
  */
 public class Solution {
 	public String convert(String s, int nRows) {
-		if("".equals(s)){
-			return "";
+		if("".equals(s)||nRows==1){
+			return s;
 		}
-		Map<Integer,StringBuilder> rowMap=new HashMap<>();
-		int rowIterator=0;
-		for(int i=0;i<s.length();i++){
-			int index=rowIterator;
-			if(index==nRows){
-				index=nRows%2;
-				rowIterator=0;
+		StringBuilder[] sbs=new StringBuilder[nRows];
+		for(int i=0;i<sbs.length;i++){
+			sbs[i]=new StringBuilder();
+		}
+		char[] chars=s.toCharArray();
+		int index=0;
+		boolean asc=true;
+		for(int i=0;i<chars.length;i++){
+			sbs[index].append(chars[i]);
+			if(asc){
+				index++;
+				if(index==nRows){
+					index-=2;
+					asc=false;
+				}
 			}else{
-				rowIterator++;
+				index--;
+				if(index==-1){
+					index+=2;
+					asc=true;
+				}
 			}
-			StringBuilder sb=rowMap.get(index);
-			if(sb==null){
-				sb=new StringBuilder();
-			}
-			sb.append(s.charAt(i));
-			rowMap.put(index, sb);
 		}
 		StringBuilder result=new StringBuilder();
-		for(int i=0;i<nRows;i++){
-			if(rowMap.get(i)!=null){
-				result.append(rowMap.get(i));
-			}
+		for(int i=0;i<sbs.length;i++){
+			result.append(sbs[i]);
 		}
 		return result.toString();
-
 	}
 }
