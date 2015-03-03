@@ -16,46 +16,40 @@ import java.util.Set;
 public class Solution {
 	public boolean isValidSudoku(char[][] board) {
 		for (int i = 0; i < 9; i++) {
-			Set<Character> checkSet = new HashSet<>();
+			Set<Character> horizionCheckSet = new HashSet<>(12);
+			Set<Character> verticalCheckSet = new HashSet<>(12);
 			for (int j = 0; j < 9; j++) {
-				if (board[i][j] == '.') {
+				if (board[i][j] == '.' && board[j][i] == '.') {
 					continue;
 				}
-				if (!checkSet.contains(board[i][j])) {
-					checkSet.add(board[i][j]);
-				} else {
-					System.out.println("false 1");
-					return false;
+				if (board[i][j] != '.') {
+					if (!horizionCheckSet.contains(board[i][j])) {
+						horizionCheckSet.add(board[i][j]);
+					} else {
+						return false;
+					}
+				}
+				if (board[j][i] != '.') {
+					if (!verticalCheckSet.contains(board[j][i])) {
+						verticalCheckSet.add(board[j][i]);
+					} else {
+						return false;
+					}
 				}
 			}
-		}
-		for (int i = 0; i < 9; i++) {
-			Set<Character> checkSet = new HashSet<>();
-			for (int j = 0; j < 9; j++) {
-				if (board[j][i] == '.') {
-					continue;
-				}
-				if (!checkSet.contains(board[j][i])) {
-					checkSet.add(board[j][i]);
-				} else {
-					System.out.println("false 2");
-					return false;
-				}
-			}
-		}
-		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < 7; j++) {
-				Set<Character> checkSet = new HashSet<>();
-				for (int si = i; si <= i + 2; si++) {
-					for (int sj = j; sj <= j + 2; sj++) {
-						if (board[si][sj] == '.') {
-							continue;
-						}
-						if (!checkSet.contains(board[si][sj])) {
-							checkSet.add(board[si][sj]);
-						} else {
-							System.out.println("false 3");
-							return false;
+			if(i%3==0&&i<7){
+				for (int k = 0; k < 7; k+=3) {
+					Set<Character> matrixCheckSet = new HashSet<>(12);
+					for (int si = i; si <= i + 2; si++) {
+						for (int sj = k; sj <= k + 2; sj++) {
+							if (board[si][sj] == '.') {
+								continue;
+							}
+							if (!matrixCheckSet.contains(board[si][sj])) {
+								matrixCheckSet.add(board[si][sj]);
+							} else {
+								return false;
+							}
 						}
 					}
 				}
