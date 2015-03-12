@@ -25,19 +25,15 @@ public class Solution {
 		if (k == 0) {
 			return;
 		}
-		for (int i = 0; i < k; i++) {
-			int temp = nums[nums.length - i - 1];
-			nums[nums.length - i - 1] = nums[i];
-			nums[i] = temp;
+		int[] temp = new int[k];
+		for(int i=0;i<k;i++){
+			temp[i]=nums[nums.length-k+i];
 		}
-		int leftToRoute = nums.length - k * 2;
-		while (leftToRoute > 0) {
-			int temp = nums[k];
-			for (int i = k; i < nums.length - 1; i++) {
-				nums[i] = nums[i + 1];
-			}
-			nums[nums.length - 1] = temp;
-			leftToRoute--;
+		for(int i=nums.length-1;i-k>=0;i--){
+			nums[i]=nums[i-k];
+		}
+		for(int i=0;i<k;i++){
+			nums[i]=temp[i];
 		}
 	}
 }
