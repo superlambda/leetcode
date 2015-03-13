@@ -12,39 +12,78 @@ package peter.liu.addtwonumbers;
  */
 public class Solution {
 	public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-		ListNode first=l1;
-		ListNode second=l2;
-		int carryNumber=0;
-		while(first!=null||second!=null){
-			if(first!=null&&second!=null){
-				first.val=first.val+second.val+carryNumber;
-				if(first.val>=0){
-					first.val-=10;
-					carryNumber=1;
-				}else{
-					carryNumber=1;
+		ListNode first = l1;
+		ListNode second = l2;
+		int carryNumber = 0;
+		while (first != null || second != null) {
+			if (first != null && second != null) {
+				first.val = first.val + second.val + carryNumber;
+				if (first.val >= 10) {
+					first.val -= 10;
+					carryNumber = 1;
+				} else {
+					carryNumber = 0;
 				}
-				first=first.next;
-				second=second.next;
-			}else if(first!=null){
-				while(first!=null&&first.val+carryNumber>=10){
-					first.val+=carryNumber-10;
-					carryNumber=1;
-					if(first.next!=null){
-						first=first.next;
-					}else{
+				if (first.next == null && second.next == null
+						&& carryNumber == 1) {
+					ListNode tail = new ListNode(carryNumber);
+					first.next = tail;
+					break;
+				}
+				first = first.next;
+				second = second.next;
+			} else if (first != null && second == null) {
+				if (first.val + carryNumber < 10) {
+					first.val += carryNumber;
+					break;
+				}
+				while (first != null && first.val + carryNumber >= 10) {
+					first.val += carryNumber - 10;
+					carryNumber = 1;
+					if (first.next != null) {
+						first = first.next;
+					} else {
+						ListNode tail = new ListNode(carryNumber);
+						first.next = tail;
+						carryNumber=0;
 						break;
 					}
 				}
-				if(carryNumber==1){
-					ListNode tail=new ListNode(carryNumber);
-					first.next=tail;
+				if (first.val + carryNumber < 10) {
+					first.val += carryNumber;
+				}
+				break;
+			} else if (second != null && first == null) {
+				first = l1;
+				while (first.next != null) {
+					first = first.next;
+				}
+				first.next = second;
+				if (second.val + carryNumber < 10) {
+					second.val += carryNumber;
 					break;
 				}
+				while (second != null && second.val + carryNumber >= 10) {
+					second.val += carryNumber - 10;
+					carryNumber = 1;
+					if (second.next != null) {
+						second = second.next;
+					} else {
+						ListNode tail = new ListNode(carryNumber);
+						second.next = tail;
+						carryNumber=0;
+						break;
+					}
+				}
+				if (second.val + carryNumber < 10) {
+					second.val += carryNumber;
+				}
+				break;
 			}
 		}
+		return l1;
 	}
-	
+
 }
 
 /**
