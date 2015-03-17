@@ -14,7 +14,24 @@ public class Solution {
 	public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
 		ListNode first = l1;
 		ListNode second = l2;
+		int l1Length = 0;
+		int l2Length = 0;
+		while (first != null) {
+			l1Length++;
+			first = first.next;
+		}
+		while (second != null) {
+			l2Length++;
+			second = second.next;
+		}
 		int carryNumber = 0;
+		if (l1Length < l2Length) {
+			ListNode temp = l1;
+			l1 = l2;
+			l2 = temp;
+		}
+		first = l1;
+		second = l2;
 		while (first != null || second != null) {
 			if (first != null && second != null) {
 				first.val = first.val + second.val + carryNumber;
@@ -45,39 +62,11 @@ public class Solution {
 					} else {
 						ListNode tail = new ListNode(carryNumber);
 						first.next = tail;
-						carryNumber=0;
+						carryNumber = 0;
 						break;
 					}
 				}
-				if (first.val + carryNumber < 10) {
-					first.val += carryNumber;
-				}
-				break;
-			} else if (second != null && first == null) {
-				first = l1;
-				while (first.next != null) {
-					first = first.next;
-				}
-				first.next = second;
-				if (second.val + carryNumber < 10) {
-					second.val += carryNumber;
-					break;
-				}
-				while (second != null && second.val + carryNumber >= 10) {
-					second.val += carryNumber - 10;
-					carryNumber = 1;
-					if (second.next != null) {
-						second = second.next;
-					} else {
-						ListNode tail = new ListNode(carryNumber);
-						second.next = tail;
-						carryNumber=0;
-						break;
-					}
-				}
-				if (second.val + carryNumber < 10) {
-					second.val += carryNumber;
-				}
+				first.val += carryNumber;
 				break;
 			}
 		}
