@@ -24,12 +24,6 @@ public class Solution {
 		if (num2.equals("1")) {
 			return num1;
 		}
-		if (num2.length() > num1.length()) {
-			String temp = num1;
-			num1 = num2;
-			num2 = temp;
-
-		}
 		int[] num1Array = new int[num1.length()];
 		int[] num2Array = new int[num2.length()];
 
