@@ -1,4 +1,4 @@
-package peter.liu.permutations;
+package peter.liu.permutationstwo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,16 +7,18 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Given a collection of numbers, return all possible permutations.
+ * Given a collection of numbers that might contain duplicates, return all
+ * possible unique permutations.
  * 
- * For example, [1,2,3] have the following permutations: [1,2,3], [1,3,2],
- * [2,1,3], [2,3,1], [3,1,2], and [3,2,1].
+ * For example, [1,1,2] have the following unique permutations: [1,1,2],
+ * [1,2,1], and [2,1,1].
  * 
  * @author superlambda
  *
  */
 public class Solution {
-	public List<List<Integer>> permute(int[] num) {
+
+	public List<List<Integer>> permuteUnique(int[] num) {
 		List<List<Integer>> result = new LinkedList<>();
 		List<Integer> list = new ArrayList<>();
 		for (int number : num) {
