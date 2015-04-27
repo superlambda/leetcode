@@ -2,7 +2,6 @@ package peter.liu.permutationstwo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,14 +16,14 @@ import java.util.Set;
  *
  */
 public class Solution {
-
 	public List<List<Integer>> permuteUnique(int[] num) {
-		List<List<Integer>> result = new LinkedList<>();
+		List<List<Integer>> result = new ArrayList<>();
 		List<Integer> list = new ArrayList<>();
 		for (int number : num) {
 			list.add(number);
 		}
-		getNexPermutation(result, new LinkedList<Integer>(), list, list.size());
+		getNexPermutation(result, new ArrayList<Integer>(list.size()), list,
+				num.length);
 		return result;
 	}
 
@@ -33,13 +32,13 @@ public class Solution {
 		Set<Integer> set = new HashSet<>();
 		for (int i = 0; i < leftList.size(); i++) {
 			if (!set.contains(leftList.get(i))) {
-				List<Integer> ppList = new LinkedList<>(pList);
+				List<Integer> ppList = new ArrayList<>(pList);
 				ppList.add(leftList.get(i));
-				if(ppList.size()<length){
-					List<Integer> lleftList = new LinkedList<>(leftList);
+				if (ppList.size() < length) {
+					List<Integer> lleftList = new ArrayList<>(leftList);
 					lleftList.remove(i);
 					getNexPermutation(result, ppList, lleftList, length);
-				}else{
+				} else {
 					result.add(ppList);
 				}
 				set.add(leftList.get(i));
