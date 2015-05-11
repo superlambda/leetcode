@@ -24,21 +24,33 @@ public class Solution {
 			}
 		}
 		return max;
-		// int sum = Integer.MIN_VALUE;
-		// int trySum = nums[0];
-		// for (int i = 1; i < nums.length; i++) {
-		// int temp = trySum + nums[i];
-		// if (temp < trySum) {
-		// if (sum < trySum) {
-		// sum = Math.max(trySum, nums[i]);
-		// trySum = nums[i];
-		// }
-		// } else {
-		// trySum = Math.max(temp, nums[i]);
-		// }
-		//
-		// }
-		// return trySum > sum ? trySum : sum;
+		
+	}
+	
+	public  int maxSubArray2(int[] nums) {
+		
+		
+		int maxSoFar=nums[0], maxEndingHere=nums[0];
+	    for (int i=1;i<nums.length;++i){
+	        maxEndingHere= Math.max(maxEndingHere+nums[i],nums[i]);
+	        maxSoFar=Math.max(maxSoFar, maxEndingHere); 
+	    }
+	    return maxSoFar;
+//		int sum = Integer.MIN_VALUE;
+//		int trySum = nums[0];
+//		for (int i = 1; i < nums.length; i++) {
+//			int temp = trySum + nums[i];
+//			if (temp < trySum) {
+//				if (sum < trySum) {
+//					sum = Math.max(trySum, nums[i]);
+//					trySum = nums[i];
+//				}
+//			} else {
+//				trySum = Math.max(temp, nums[i]);
+//			}
+//
+//		}
+//		return trySum > sum ? trySum : sum;
 	}
 
 }
