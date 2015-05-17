@@ -24,33 +24,45 @@ public class Solution {
 			}
 		}
 		return max;
-		
+//		return divide_conquer(0,nums.length-1,nums);
 	}
 	
 	public  int maxSubArray2(int[] nums) {
-		
-		
 		int maxSoFar=nums[0], maxEndingHere=nums[0];
 	    for (int i=1;i<nums.length;++i){
 	        maxEndingHere= Math.max(maxEndingHere+nums[i],nums[i]);
 	        maxSoFar=Math.max(maxSoFar, maxEndingHere); 
 	    }
 	    return maxSoFar;
-//		int sum = Integer.MIN_VALUE;
-//		int trySum = nums[0];
-//		for (int i = 1; i < nums.length; i++) {
-//			int temp = trySum + nums[i];
-//			if (temp < trySum) {
-//				if (sum < trySum) {
-//					sum = Math.max(trySum, nums[i]);
-//					trySum = nums[i];
-//				}
-//			} else {
-//				trySum = Math.max(temp, nums[i]);
-//			}
-//
-//		}
-//		return trySum > sum ? trySum : sum;
+	}
+	
+	
+	int divide_conquer(int left,int right,int nums[]){
+		if(left > right){
+		    return Integer.MIN_VALUE;
+		}
+		int mid = (left + right)/2;
+		int lmax = divide_conquer(left,mid-1,nums);
+		int rmax = divide_conquer(mid+1,right,nums);
+		int maxv = Math.max(lmax,rmax);
+		int sum = 0;
+		int mlmax = 0;
+		for(int i = mid - 1; i >= left; --i){
+		    sum+=nums[i];
+		    if(sum > mlmax){
+		        mlmax = sum;
+		    }
+		}
+		sum = 0;
+		int mrmax = 0;
+		for(int i = mid + 1; i <= right; ++i){
+		    sum += nums[i];
+		    if(sum > mrmax){
+		        mrmax = sum;
+		    }
+		}
+		maxv = Math.max(maxv, mlmax + mrmax + nums[mid]);
+		return maxv;
 	}
 
 }
