@@ -8,7 +8,7 @@ public class SolutionTest {
 
 	@Test
 	public void testUniquePaths() {
-		System.out.println("unique path: "+new Solution().uniquePaths(23, 12));
+		System.out.println("unique path: "+new Solution().uniquePaths(20, 20));
 		
 	}
 
