@@ -12,19 +12,11 @@ package peter.liu.sqrtx;
 public class Solution {
 
 	public int mySqrt(int x) {
-		if (x == 0 || x == 1) {
-			return x;
-		}
 		int low = 1;
-		int high = x;
+		int high = x>46340?46340:x;
 		int mid = 0;
-		int maxResult = (int) Math.sqrt(Integer.MAX_VALUE);
 		while (low < high) {
 			mid = low + (high - low) / 2;
-			if (mid > maxResult) {
-				high = mid - 1;
-				continue;
-			}
 			int power = mid * mid;
 			if (power == x) {
 				return mid;
@@ -33,12 +25,6 @@ public class Solution {
 			} else {
 				high = mid - 1;
 			}
-		}
-		if (mid > maxResult) {
-			while (mid > maxResult) {
-				mid--;
-			}
-			return mid;
 		}
 
 		if (mid * mid > x) {
