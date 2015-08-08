@@ -12,7 +12,7 @@ import java.util.Set;
  * 
  * For example, Given board =
  * 
- * [ ["ABCE"], ["SFCS"], ["ADEE"] ] word = "ABCCED", -> returns true, word =
+ * [ ["ABCE"], ["SFCS"], ["ADEE"] ] word  = "ABCCED", -> returns true, word =
  * "SEE", -> returns true, word = "ABCB", -> returns false.
  * 
  * @author superlambda
