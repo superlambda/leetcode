@@ -12,21 +12,21 @@ import java.util.Set;
  * 
  * For example, Given board =
  * 
- * [ ["ABCE"], ["SFCS"], ["ADEE"] ] word  = "ABCCED", -> returns true, word =
+ * [ ["ABCE"], ["SFCS"], ["ADEE"] ] word = "ABCCED", -> returns true, word =
  * "SEE", -> returns true, word = "ABCB", -> returns false.
  * 
  * @author superlambda
  *
  */
 public class Solution {
-	private String word;
 
 	public boolean exist(char[][] board, String word) {
-		this.word = word;
+		char[] words = word.toCharArray();
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
-				if (board[i][j] == this.word.charAt(0)
-						&& checkExisting(board, new HashSet<String>(), i, j)) {
+				if (board[i][j] == words[0]
+						&& checkExisting(board, new HashSet<String>(), i, j,
+								words)) {
 					return true;
 				}
 			}
@@ -35,34 +35,65 @@ public class Solution {
 
 	}
 
-	private boolean checkExisting(char[][] board, Set<String> set, int i, int j) {
-		if (set.size() == word.length()-1) {
+	private boolean checkExisting(char[][] board, Set<String> set, int i,
+			int j, char[] word) {
+		if (set.size() == word.length - 1) {
 			return true;
 		}
-		set.add(i + "," + j);
-		
-		if (j + 1 < board[0].length && !set.contains(i + "," + (j + 1))
-				&& board[i][j + 1] == this.word.charAt(set.size())
-				&& checkExisting(board, set, i, j + 1)) {
+		String comb = i + "," + j;
+		set.add(comb);
+
+		int jPlus = j + 1;
+		if (jPlus < board[0].length && !set.contains(i + "," + jPlus)
+				&& board[i][jPlus] == word[set.size()]
+				&& checkExisting(board, set, i, jPlus, word)) {
 			return true;
 		}
-		if (i + 1 < board.length && !set.contains((i + 1) + "," + j)
-				&& board[i + 1][j] == this.word.charAt(set.size())
-				&& checkExisting(board, set, i + 1, j)) {
+		int iPlus = i + 1;
+		if (iPlus < board.length && !set.contains(iPlus + "," + j)
+				&& board[iPlus][j] == word[set.size()]
+				&& checkExisting(board, set, iPlus, j, word)) {
 			return true;
 		}
-		if ((j - 1) >= 0 && !set.contains(i + "," + (j - 1))
-				&& board[i][j - 1] == this.word.charAt(set.size())
-				&& checkExisting(board, set, i, j - 1)) {
+		int jMinus = j - 1;
+		if (jMinus >= 0 && !set.contains(i + "," + jMinus)
+				&& board[i][jMinus] == word[set.size()]
+				&& checkExisting(board, set, i, jMinus, word)) {
 			return true;
 		}
-		if ((i - 1) >= 0 && !set.contains((i - 1) + "," + j)
-				&& board[i - 1][j] == this.word.charAt(set.size())
-				&& checkExisting(board, set, i - 1, j)) {
+		int iMinus = i - 1;
+		if (iMinus >= 0 && !set.contains(iMinus + "," + j)
+				&& board[iMinus][j] == word[set.size()]
+				&& checkExisting(board, set, iMinus, j, word)) {
 			return true;
 		}
-		set.remove(i + "," + j);
+		set.remove(comb);
 		return false;
 
 	}
+
+	// A better solution
+	// public boolean exist(char[][] board, String word) {
+	// char[] w = word.toCharArray();
+	// for (int y=0; y<board.length; y++) {
+	// for (int x=0; x<board[y].length; x++) {
+	// if (exist(board, y, x, w, 0)) return true;
+	// }
+	// }
+	// return false;
+	// }
+	//
+	// private boolean exist(char[][] board, int y, int x, char[] word, int i) {
+	// if (i == word.length) return true;
+	// if (y<0 || x<0 || y == board.length || x == board[y].length) return
+	// false;
+	// if (board[y][x] != word[i]) return false;
+	// board[y][x] ^= 256;
+	// boolean exist = exist(board, y, x+1, word, i+1)
+	// || exist(board, y, x-1, word, i+1)
+	// || exist(board, y+1, x, word, i+1)
+	// || exist(board, y-1, x, word, i+1);
+	// board[y][x] ^= 256;
+	// return exist;
+	// }
 }
