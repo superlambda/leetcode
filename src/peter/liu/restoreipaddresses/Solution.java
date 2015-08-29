@@ -30,13 +30,13 @@ public class Solution {
 			return;
 		}
 
+		int leftLength = s.length() - startIndex;
 		if (numberAdded == 3) {
-			if (s.length() - startIndex > 3) {
+			if (leftLength > 3
+					|| (leftLength >= 2 && s.charAt(startIndex) == '0')) {
 				return;
 			}
-			if (s.length() - startIndex >= 2 && s.charAt(startIndex) == '0') {
-				return;
-			}
+
 			int number = Integer.valueOf(s.substring(startIndex));
 			if (number <= 255) {
 				leadingIpString.append(number);
@@ -45,7 +45,6 @@ public class Solution {
 				return;
 			}
 		} else {
-			int leftLength = s.length() - startIndex;
 			if (leftLength >= 1) {
 				StringBuffer tempOneLeading = new StringBuffer(leadingIpString);
 				tempOneLeading.append(s.substring(startIndex, startIndex + 1))
@@ -53,20 +52,15 @@ public class Solution {
 				getIpAddress(result, tempOneLeading, numberAdded + 1,
 						startIndex + 1, s);
 			}
-			if (leftLength >= 2) {
-				if (s.charAt(startIndex) == '0') {
-					return;
-				}
+			if (leftLength >= 2 && s.charAt(startIndex) != '0') {
+
 				StringBuffer tempTwoLeading = new StringBuffer(leadingIpString);
 				tempTwoLeading.append(s.substring(startIndex, startIndex + 2))
 						.append(".");
 				getIpAddress(result, tempTwoLeading, numberAdded + 1,
 						startIndex + 2, s);
 			}
-			if (leftLength >= 3) {
-				if (s.charAt(startIndex) == '0') {
-					return;
-				}
+			if (leftLength >= 3 && s.charAt(startIndex) != '0') {
 				int number = Integer.valueOf(s.substring(startIndex,
 						startIndex + 3));
 				if (number <= 255) {
