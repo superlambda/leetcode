@@ -1,9 +1,7 @@
 package peter.liu.binarytreeinordertraversal;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -20,44 +18,66 @@ import java.util.Stack;
  *
  */
 public class Solution {
+	
 	public List<Integer> inorderTraversalUsing(TreeNode root) {
 		List<Integer> result = new LinkedList<>();
 		Stack<TreeNode> stack = new Stack<>();
-		if (root != null) {
-			stack.push(root);
-		}
-		Set<TreeNode> set = new HashSet<>();
-		while (!stack.isEmpty()) {
-			TreeNode node = stack.pop();
-			if (node.left == null && node.right == null) {
-				result.add(node.val);
-			} else if (node.left != null && node.right != null) {
-				if (!set.contains(node)) {
-					stack.push(node.right);
-					stack.push(node);
-					stack.push(node.left);
-					set.add(node);
-				} else {
-					result.add(node.val);
-				}
-
-			} else if (node.left != null && node.right == null) {
-				if (!set.contains(node)) {
-					stack.push(node);
-					stack.push(node.left);
-					set.add(node);
-				} else {
-					result.add(node.val);
-				}
-
-			} else if (node.left == null && node.right != null) {
-				result.add(node.val);
-				stack.push(node.right);
+		TreeNode node=root;
+		while (!stack.isEmpty()||node!=null) {
+			while(node!=null){
+				stack.push(node);
+				node=node.left;
+			}
+			node=stack.pop();
+			result.add(node.val);
+			if(node.right!=null){
+				node =node.right;
+			}else{
+				node=null;
 			}
 		}
 
 		return result;
 	}
+	
+//	public List<Integer> inorderTraversalUsing(TreeNode root) {
+//		List<Integer> result = new LinkedList<>();
+//		Stack<TreeNode> stack = new Stack<>();
+//		if (root != null) {
+//			stack.push(root);
+//		}
+//		Set<TreeNode> set = new HashSet<>();
+//		while (!stack.isEmpty()) {
+//			TreeNode node = stack.pop();
+//			if (node.left == null && node.right == null) {
+//				result.add(node.val);
+//			} else if (node.left != null && node.right != null) {
+//				if (!set.contains(node)) {
+//					stack.push(node.right);
+//					stack.push(node);
+//					stack.push(node.left);
+//					set.add(node);
+//				} else {
+//					result.add(node.val);
+//				}
+//
+//			} else if (node.left != null && node.right == null) {
+//				if (!set.contains(node)) {
+//					stack.push(node);
+//					stack.push(node.left);
+//					set.add(node);
+//				} else {
+//					result.add(node.val);
+//				}
+//
+//			} else if (node.left == null && node.right != null) {
+//				result.add(node.val);
+//				stack.push(node.right);
+//			}
+//		}
+//
+//		return result;
+//	}
 
 	public static void main(String[] args) {
 		// TreeNode root=new TreeNode(1);
