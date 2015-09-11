@@ -1,6 +1,5 @@
 package peter.liu.constructbinarytreefrompreorderandinordertraversal;
 
-import java.util.Arrays;
 
 /**
  * Given preorder and inorder traversal of a tree, construct the binary tree.
@@ -17,31 +16,29 @@ public class Solution {
 		if (preorder == null || preorder.length == 0) {
 			return null;
 		}
-		return getChildTree(preorder, inorder);
+		return getChildTree(preorder, inorder, 0, inorder.length);
 	}
 
-	private TreeNode getChildTree(int[] preorder, int[] inorder) {
+	private TreeNode getChildTree(int[] preorder, int[] inorder, int from,
+			int to) {
 		TreeNode node = new TreeNode(preorder[indexOfPreOrder]);
-		int indexOfNode = getIndexOfNode(node.val, inorder);
+		int indexOfNode = getIndexOfNode(node.val, inorder, from, to);
 		if (indexOfNode != -1) {
-			int[] leftInorder = Arrays.copyOfRange(inorder, 0, indexOfNode);
-			if (leftInorder != null && leftInorder.length > 0) {
+			if (indexOfNode > from) {
 				++indexOfPreOrder;
-				node.left = getChildTree(preorder, leftInorder);
+				node.left = getChildTree(preorder, inorder, from, indexOfNode);
 			}
-
-			int[] rightInorder = Arrays.copyOfRange(inorder, indexOfNode + 1,
-					inorder.length);
-			if (rightInorder != null && rightInorder.length > 0) {
+			if (indexOfNode < to-1) {
 				++indexOfPreOrder;
-				node.right = getChildTree(preorder, rightInorder);
+				node.right = getChildTree(preorder, inorder, indexOfNode + 1,
+						to);
 			}
 		}
 		return node;
 	}
 
-	private int getIndexOfNode(int val, int[] inorder) {
-		for (int i = 0; i < inorder.length; i++) {
+	private int getIndexOfNode(int val, int[] inorder, int from, int to) {
+		for (int i = from; i < to; i++) {
 			if (inorder[i] == val) {
 				return i;
 			}
