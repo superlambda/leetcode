@@ -2,6 +2,7 @@ package peter.liu.binarytreepreordertraversal;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Given a binary tree, return the preorder traversal of its nodes' values.
@@ -21,11 +22,30 @@ Note: Recursive solution is trivial, could you do it iteratively?
  */
 public class Solution {
 	public List<Integer> preorderTraversal(TreeNode root) {
+		Stack<TreeNode> stack=new Stack<>();
+		if(root!=null){
+			stack.add(root);
+		}
 		List<Integer> result=new LinkedList<>();
-		traverse(root,result);
+		while(!stack.isEmpty()){
+			TreeNode node=stack.pop();
+			result.add(node.val);
+			if(node.right != null){
+				stack.add(node.right);
+			}
+			if(node.left != null){
+				stack.add(node.left);
+			}
+		}
 		return result;
-
 	}
+	
+//	public List<Integer> preorderTraversal(TreeNode root) {
+//		List<Integer> result=new LinkedList<>();
+//		traverse(root,result);
+//		return result;
+//
+//	}
 	private void traverse(TreeNode node,List<Integer> result){
 		if(node!=null){
 			result.add(node.val);
