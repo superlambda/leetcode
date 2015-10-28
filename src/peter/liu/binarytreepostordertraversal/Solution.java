@@ -2,6 +2,7 @@ package peter.liu.binarytreepostordertraversal;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 
 /**
@@ -23,9 +24,25 @@ Note: Recursive solution is trivial, could you do it iteratively?
  */
 public class Solution {
 	public List<Integer> postorderTraversal(TreeNode root) {
-		List<Integer> result=new LinkedList<>();
-		traverse(root,result);
+		Stack<TreeNode> stack=new Stack<>();
+		if(root!=null){
+			stack.add(root);
+		}
+		LinkedList<Integer> result=new LinkedList<>();
+		while(!stack.isEmpty()){
+			TreeNode node=stack.pop();
+			result.addFirst(node.val);
+			if(node.left != null){
+				stack.add(node.left);
+			}
+			if(node.right != null){
+				stack.add(node.right);
+			}
+		}
 		return result;
+//		List<Integer> result=new LinkedList<>();
+//		traverse(root,result);
+//		return result;
 	}
 
 	private void traverse(TreeNode node, List<Integer> result) {
