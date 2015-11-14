@@ -17,29 +17,28 @@ import java.util.Stack;
  */
 public class BSTIterator {
 	Stack<TreeNode> stack=new Stack<>();
-	int smallestNumber=Integer.MIN_VALUE;
+	//You stupid guy, you have to use a value to decide if you should push left first....
+//	int smallestNumber=Integer.MIN_VALUE;
 	public BSTIterator(TreeNode root) {
-		if(root!=null){
-			stack.push(root);
-		}
+		pushAll(root);
 	}
 
 	/** @return whether we have a next smallest number */
 	public boolean hasNext() {
 		return !stack.isEmpty();
 	}
+	private void pushAll(TreeNode node){
+		while(node!=null){
+			stack.push(node);
+			node=node.left;
+		}
+	}
 
 	/** @return the next smallest number */
 	public int next() {
-		while(stack.peek().left!=null&&stack.peek().left.val>smallestNumber){
-			stack.push(stack.peek().left);
-		}
 		TreeNode smallestNode=stack.pop();
-		if(smallestNode.right!=null){
-			stack.push(smallestNode.right);
-		}
-		smallestNumber=smallestNode.val;
-		return smallestNumber;
+		pushAll(smallestNode.right);
+		return smallestNode.val;
 	}
 }
 
