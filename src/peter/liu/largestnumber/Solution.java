@@ -1,7 +1,6 @@
 package peter.liu.largestnumber;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Given a list of non negative integers, arrange them such that they form the
@@ -21,19 +20,18 @@ public class Solution {
 		for (int i = 0; i < nums.length; i++) {
 			ns[i] = nums[i];
 		}
-		Arrays.sort(ns, new Comparator<Integer>() {
-			@Override
-			public int compare(Integer h1, Integer h2) {
-				String s1 = String.valueOf(h1);
-				String s2 = String.valueOf(h2);
-				return (s2+s1).compareTo(s1+s2);
-			}
+
+		Arrays.parallelSort(ns, (Integer h1, Integer h2) -> {
+			String s1 = String.valueOf(h1);
+			String s2 = String.valueOf(h2);
+			return (s2 + s1).compareTo(s1 + s2);
 		});
+
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < ns.length; i++) {
 			sb.append(ns[i]);
 		}
-		if(sb.charAt(0)=='0'){
+		if (sb.charAt(0) == '0') {
 			return "0";
 		}
 		return sb.toString();
