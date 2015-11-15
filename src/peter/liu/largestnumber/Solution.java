@@ -22,8 +22,12 @@ public class Solution {
 		}
 
 		Arrays.parallelSort(ns, (Integer h1, Integer h2) -> {
+			
 			String s1 = String.valueOf(h1);
 			String s2 = String.valueOf(h2);
+			if(s1.length()==s2.length()){
+				return s2.compareTo(s1);
+			}
 			return (s2 + s1).compareTo(s1 + s2);
 		});
 
