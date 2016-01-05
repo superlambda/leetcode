@@ -24,7 +24,7 @@ public class Solution {
 				iterator.next=iterator.next.next;
 			}else{
 				iterator=iterator.next;
-			}
+			} 
 		}
 		return tempHead.next;        
     }
