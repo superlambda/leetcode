@@ -28,9 +28,11 @@ public class Solution {
 
 	private boolean isSubStringMatch(String s, String p, int sStartIndex, int pStartIndex) {
 		if (sStartIndex == s.length()) {
+			//all reaches end
 			if (pStartIndex == p.length()) {
 				return true;
 			}
+			//The left sub string are . or [a-z]
 			for (; pStartIndex <= p.length() - 1; pStartIndex++) {
 				if (p.charAt(pStartIndex) != '*'
 						&& (pStartIndex == p.length() - 1 || p.charAt(pStartIndex + 1) != '*')) {
@@ -39,30 +41,33 @@ public class Solution {
 			}
 			return true;
 		}
-		
+		// s not reaches end but p reaches end
 		if (pStartIndex == p.length()) {
 			return false;
 		}
 		
 		if (isMatchFirst(s, p, sStartIndex, pStartIndex)) {
 			if (pStartIndex < p.length() - 1) {
+				//consider * 0 or many times
 				if (p.charAt(pStartIndex + 1) == '*') {
-					if (isSubStringMatch(s, p, sStartIndex, pStartIndex+2)) {
+					if (isSubStringMatch(s, p, sStartIndex, pStartIndex + 2)
+							|| isSubStringMatch(s, p, sStartIndex + 1, pStartIndex)) {
 						return true;
 					}
-					if (isSubStringMatch(s, p, sStartIndex + 1, pStartIndex)) {
-						return true;
-					}
-					
+
 				} else {
+					//increase both s and p
 					if (isSubStringMatch(s, p, sStartIndex + 1, pStartIndex + 1)) {
 						return true;
 					}
 				}
 			}else{
+				//p reaches end but s not
 				if(sStartIndex<s.length()-1){
 					return false;
 				}else{
+					// increase both s and p 
+					//TODO to see if can be matched with line 59
 					if (isSubStringMatch(s, p, sStartIndex + 1, pStartIndex + 1)) {
 						return true;
 					}
@@ -70,16 +75,9 @@ public class Solution {
 			}
 			
 		} else {
-			if (pStartIndex < p.length() - 1) {
-				if (p.charAt(pStartIndex + 1) == '*') {
-					if (isSubStringMatch(s, p, sStartIndex, pStartIndex+2)) {
-						return true;
-					}
-				} else {
-					return false;
-				}
-			}else{
-				return false;
+			if (pStartIndex < p.length() - 1 && p.charAt(pStartIndex + 1) == '*'
+					&& isSubStringMatch(s, p, sStartIndex, pStartIndex + 2)) {
+				return true;
 			}
 		}
 		return false;
