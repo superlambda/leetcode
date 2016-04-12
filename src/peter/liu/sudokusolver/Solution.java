@@ -22,9 +22,9 @@ public class Solution {
 		Map<Integer,Stack<Character>>horizionMap=new HashMap<>();
 		Map<Integer,Stack<Character>>verticalMap=new HashMap<>();
 		Map<Integer,Stack<Character>>matrixMap=new HashMap<>();
-		char[][] copyBoard=new char[9][9];
+		char[][] workBoard=new char[9][9];
 		for(int i=0;i<9;i++){
-			copyBoard[i]=board[i].clone();
+			workBoard[i]=board[i].clone();
 			for(int j=0;j<9;j++){
 				Stack<Character> horizionSet=horizionMap.get(i);
 				if(horizionSet==null){
@@ -51,7 +51,6 @@ public class Solution {
 			}
 		}
 		
-		char[][] workBoard=cloneBoard(board);
 		solved(0, 0, workBoard, horizionMap, verticalMap, matrixMap);
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
@@ -146,15 +145,6 @@ public class Solution {
 		return false;
 
 	}
-	private char[][] cloneBoard(char[][] board){
-		char[][] copyBoard=new char[9][9];
-		for(int i=0;i<9;i++){
-			copyBoard[i]=board[i].clone();
-		}
-		return copyBoard;
-	}
-	
-	
 	
 	public boolean isValidSudoku(char[][] board) {
 		for (int i = 0; i < 9; i++) {
