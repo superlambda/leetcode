@@ -18,7 +18,6 @@ import java.util.Stack;
  */
 public class Solution {
 	
-	private char[][] result=null;
 	public void solveSudoku(char[][] board) {
 		Map<Integer,Stack<Character>>horizionMap=new HashMap<>();
 		Map<Integer,Stack<Character>>verticalMap=new HashMap<>();
@@ -52,10 +51,11 @@ public class Solution {
 			}
 		}
 		
-		solved(0, 0, board, horizionMap, verticalMap, matrixMap);
+		char[][] workBoard=cloneBoard(board);
+		solved(0, 0, workBoard, horizionMap, verticalMap, matrixMap);
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				board[i][j] = result[i][j];
+				board[i][j] = workBoard[i][j];
 			}
 		}
 	}
@@ -67,7 +67,6 @@ public class Solution {
 		if(board[i][j]!='.'){
 			if(i==8&&j==8){
 				if (isValidSudoku(board)){
-					result=board;
 					return true;
 				}else{
 					return false;
@@ -80,6 +79,7 @@ public class Solution {
 				horizionSet.push(board[i][j]);
 				verticalSet.push(board[i][j]);
 				matrixSet.push(board[i][j]);
+				
 				if(j<8){
 					j++;
 				}else if(j==8&&i<8){
@@ -108,16 +108,15 @@ public class Solution {
 					horizionSet.push(c);
 					verticalSet.push(c);
 					matrixSet.push(c);
-					char[][] newBoard=cloneBoard(board);
-					newBoard[i][j]=c;
+					board[i][j]=c;
 					if (i == 8 && j == 8) {
-						if (isValidSudoku(newBoard)) {
-							result = newBoard;
+						if (isValidSudoku(board)) {
 							return true;
 						}else{
 							horizionSet.pop();
 							verticalSet.pop();
 							matrixSet.pop();
+							board[i][j]='.';
 						}
 					}else{
 						int newI=i;
@@ -128,13 +127,14 @@ public class Solution {
 							newI++;
 							newJ=0;
 						}
-						if (solved(newI, newJ, newBoard, horizionMap,
+						if (solved(newI, newJ, board, horizionMap,
 								verticalMap, matrixMap)){
 							return true;
 						}else{
 							horizionSet.pop();
 							verticalSet.pop();
 							matrixSet.pop();
+							board[i][j]='.';
 						}
 					}
 					
