@@ -18,19 +18,20 @@ import java.util.Stack;
  */
 public class Solution {
 	
+	private Map<Integer,Stack<Character>>horizionMap=new HashMap<>();
+	private Map<Integer,Stack<Character>>verticalMap=new HashMap<>();
+	private Map<Integer,Stack<Character>>matrixMap=new HashMap<>();
 	public void solveSudoku(char[][] board) {
-		Map<Integer,Stack<Character>>horizionMap=new HashMap<>();
-		Map<Integer,Stack<Character>>verticalMap=new HashMap<>();
-		Map<Integer,Stack<Character>>matrixMap=new HashMap<>();
+		
 		char[][] workBoard=new char[9][9];
 		for(int i=0;i<9;i++){
 			workBoard[i]=board[i].clone();
+			Stack<Character> horizionSet=horizionMap.get(i);
+			if(horizionSet==null){
+				horizionSet=new Stack<>();
+				horizionMap.put(i, horizionSet);
+			}
 			for(int j=0;j<9;j++){
-				Stack<Character> horizionSet=horizionMap.get(i);
-				if(horizionSet==null){
-					horizionSet=new Stack<>();
-					horizionMap.put(i, horizionSet);
-				}
 				Stack<Character> verticalSet=verticalMap.get(j);
 				if(verticalSet==null){
 					verticalSet=new Stack<>();
@@ -51,18 +52,15 @@ public class Solution {
 			}
 		}
 		
-		solved(0, 0, workBoard, horizionMap, verticalMap, matrixMap);
+		solved(0, 0, workBoard);
 		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				board[i][j] = workBoard[i][j];
-			}
+			board[i]=workBoard[i].clone();
 		}
 	}
 	
 	
 
-	private boolean solved(int i, int j, char[][] board, Map<Integer, Stack<Character>> horizionMap,
-			Map<Integer, Stack<Character>> verticalMap, Map<Integer, Stack<Character>> matrixMap) {
+	private boolean solved(int i, int j, char[][] board) {
 		if(board[i][j]!='.'){
 			if(i==8&&j==8){
 				if (isValidSudoku(board)){
@@ -85,8 +83,7 @@ public class Solution {
 					i++;
 					j=0;
 				}
-				if(solved(i, j, board, horizionMap,
-						verticalMap, matrixMap)){
+				if(solved(i, j, board)){
 					return true;
 				}else{
 					horizionSet.pop();
@@ -126,8 +123,7 @@ public class Solution {
 							newI++;
 							newJ=0;
 						}
-						if (solved(newI, newJ, board, horizionMap,
-								verticalMap, matrixMap)){
+						if (solved(newI, newJ, board)){
 							return true;
 						}else{
 							horizionSet.pop();
