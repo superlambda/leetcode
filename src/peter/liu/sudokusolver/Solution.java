@@ -1,9 +1,7 @@
 package peter.liu.sudokusolver;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -63,16 +61,11 @@ public class Solution {
 	private boolean solved(int i, int j, char[][] board) {
 		if(board[i][j]!='.'){
 			if(i==8&&j==8){
-				if (isValidSudoku(board)){
-					return true;
-				}else{
-					return false;
-				}
+				return true;
 			}else{
 				Stack<Character> horizionSet=horizionMap.get(i);
 				Stack<Character> verticalSet=verticalMap.get(j);
-				int matrixSetKey=getMatrixSetKey(i, j);
-				Stack<Character> matrixSet=matrixMap.get(matrixSetKey);
+				Stack<Character> matrixSet=matrixMap.get(getMatrixSetKey(i, j));
 				horizionSet.push(board[i][j]);
 				verticalSet.push(board[i][j]);
 				matrixSet.push(board[i][j]);
@@ -95,26 +88,18 @@ public class Solution {
 		}else{
 			Stack<Character> horizionSet=horizionMap.get(i);
 			Stack<Character> verticalSet=verticalMap.get(j);
-			int matrixSetKey=getMatrixSetKey(i, j);
-			Stack<Character> matrixSet=matrixMap.get(matrixSetKey);
+			Stack<Character> matrixSet=matrixMap.get(getMatrixSetKey(i, j));
 			for(char c='1'; c<='9';c++){
 				if(horizionSet.search(c)==-1
 						&&verticalSet.search(c)==-1
 						&&matrixSet.search(c)==-1){
-					horizionSet.push(c);
-					verticalSet.push(c);
-					matrixSet.push(c);
 					board[i][j]=c;
 					if (i == 8 && j == 8) {
-						if (isValidSudoku(board)) {
-							return true;
-						}else{
-							horizionSet.pop();
-							verticalSet.pop();
-							matrixSet.pop();
-							board[i][j]='.';
-						}
+						return true;
 					}else{
+						horizionSet.push(c);
+						verticalSet.push(c);
+						matrixSet.push(c);
 						int newI=i;
 						int newJ=j;
 						if(newJ<8){
@@ -140,50 +125,6 @@ public class Solution {
 		
 		return false;
 
-	}
-	
-	public boolean isValidSudoku(char[][] board) {
-		for (int i = 0; i < 9; i++) {
-			Set<Character> horizionCheckSet = new HashSet<>(12);
-			Set<Character> verticalCheckSet = new HashSet<>(12);
-			for (int j = 0; j < 9; j++) {
-				if (board[i][j] == '.' && board[j][i] == '.') {
-					continue;
-				}
-				if (board[i][j] != '.') {
-					if (!horizionCheckSet.contains(board[i][j])) {
-						horizionCheckSet.add(board[i][j]);
-					} else {
-						return false;
-					}
-				}
-				if (board[j][i] != '.') {
-					if (!verticalCheckSet.contains(board[j][i])) {
-						verticalCheckSet.add(board[j][i]);
-					} else {
-						return false;
-					}
-				}
-			}
-			if(i%3==0&&i<7){
-				for (int k = 0; k < 7; k+=3) {
-					Set<Character> matrixCheckSet = new HashSet<>(12);
-					for (int si = i; si <= i + 2; si++) {
-						for (int sj = k; sj <= k + 2; sj++) {
-							if (board[si][sj] == '.') {
-								continue;
-							}
-							if (!matrixCheckSet.contains(board[si][sj])) {
-								matrixCheckSet.add(board[si][sj]);
-							} else {
-								return false;
-							}
-						}
-					}
-				}
-			}
-		}
-		return true;
 	}
 
 	private int getMatrixSetKey(int i, int j) {
