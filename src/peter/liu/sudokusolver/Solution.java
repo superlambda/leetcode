@@ -21,22 +21,17 @@ public class Solution {
 	private Map<Integer,Stack<Character>>matrixMap=new HashMap<>();
 	public void solveSudoku(char[][] board) {
 		for(int i=0;i<9;i++){
-			Stack<Character> horizionSet=new Stack<>();
-			horizionMap.put(i, horizionSet);
-			Stack<Character> verticalSet=new Stack<>();
-			verticalMap.put(i, verticalSet);
-			Stack<Character> matrixSet=new Stack<>();
-			matrixMap.put(i, matrixSet);
+			horizionMap.put(i, new Stack<>());
+			verticalMap.put(i, new Stack<>());
+			matrixMap.put(i, new Stack<>());
 		}
 		for(int i=0;i<9;i++){
 			Stack<Character> horizionSet=horizionMap.get(i);
 			for(int j=0;j<9;j++){
-				Stack<Character> verticalSet=verticalMap.get(j);
-				Stack<Character> matrixSet=matrixMap.get(getMatrixSetKey(i, j));	
-				if(board[i][j]!='.'){	
+				if(board[i][j]!='.'){
 					horizionSet.push(board[i][j]);
-					verticalSet.push(board[i][j]);
-					matrixSet.push(board[i][j]);
+					verticalMap.get(j).push(board[i][j]);
+					matrixMap.get(getMatrixSetKey(i, j)).push(board[i][j]);
 				}
 			}
 		}
