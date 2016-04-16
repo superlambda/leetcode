@@ -20,10 +20,7 @@ public class Solution {
 	private Map<Integer,Stack<Character>>verticalMap=new HashMap<>();
 	private Map<Integer,Stack<Character>>matrixMap=new HashMap<>();
 	public void solveSudoku(char[][] board) {
-		
-		char[][] workBoard=new char[9][9];
 		for(int i=0;i<9;i++){
-			workBoard[i]=board[i].clone();
 			Stack<Character> horizionSet=horizionMap.get(i);
 			if(horizionSet==null){
 				horizionSet=new Stack<>();
@@ -50,10 +47,7 @@ public class Solution {
 			}
 		}
 		
-		solved(0, 0, workBoard);
-		for (int i = 0; i < 9; i++) {
-			board[i]=workBoard[i].clone();
-		}
+		solved(0, 0, board);
 	}
 	
 	
