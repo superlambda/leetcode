@@ -21,7 +21,7 @@ import java.util.Set;
  *
  */
 public class Solution {
-	private int[] numberOfWildCard= null;
+	private int[] numberOfWildCard=  null;
 	private Set<String> calculatedSet=new HashSet<>();
 	public boolean isMatch(String s, String p) {
 		StringBuffer sb=new StringBuffer();
