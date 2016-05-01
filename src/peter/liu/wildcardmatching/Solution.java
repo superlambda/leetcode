@@ -37,9 +37,6 @@ public class Solution {
 			pt++;
 		}
 		p=sb.toString();
-		if(s.equals("")&&p.equals("*")){
-			return true;
-		}
 		setNumberOfWildCard(p);
         return checkMatch(s,p,0,0);
     }
