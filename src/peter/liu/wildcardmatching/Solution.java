@@ -21,25 +21,70 @@ import java.util.Set;
  *
  */
 public class Solution {
+	
+	/**
+	 * DP solution from others
+	 * @param s
+	 * @param p
+	 * @return
+	 */
+	public boolean isMatch(String s, String p) {
+        int sLength = s.length(), pLength = p.length();
+        int count = 0;
+        for (int i = 0; i < pLength; i++) {
+            if (p.charAt(i) == '*'){
+            	count++;
+            }
+        }
+        if (count==0 && sLength != pLength){
+        	return false;
+        } else if (pLength - count > sLength) {
+        	return false;
+        }
+
+        boolean[] match = new boolean[sLength+1];
+        match[0] = true;
+        for (int i = 0; i < sLength; i++) {
+            match[i+1] = false;
+        }
+        
+        
+        //Really hard to understand, don't understand until now.
+        for (int i = 0; i < pLength; i++) {
+            if (p.charAt(i) == '*') {
+            	
+                for (int j = 0; j < sLength; j++) {
+                    match[j+1] = match[j] || match[j+1]; 
+                }
+            } else {
+                for (int j = sLength-1; j >= 0; j--) {
+                    match[j+1] = (p.charAt(i) == '?' || p.charAt(i) == s.charAt(j)) && match[j];
+                }
+                match[0] = false;
+            }
+        }
+        return match[sLength];
+    }
+	
 	private int[] numberOfWildCard=  null;
 	private Set<String> calculatedSet=new HashSet<>();
-	public boolean isMatch(String s, String p) {
-		StringBuffer sb=new StringBuffer();
-		int pt=0;
-		while(pt<p.length()){
-			if(pt==0){
-				sb.append(p.charAt(pt));
-			}else{
-				if(!(p.charAt(pt)=='*'&&p.charAt(pt-1)=='*')){
-					sb.append(p.charAt(pt));
-				}
-			}
-			pt++;
-		}
-		p=sb.toString();
-		setNumberOfWildCard(p);
-        return checkMatch(s,p,0,0);
-    }
+//	public boolean isMatch(String s, String p) {
+//		StringBuffer sb=new StringBuffer();
+//		int pt=0;
+//		while(pt<p.length()){
+//			if(pt==0){
+//				sb.append(p.charAt(pt));
+//			}else{
+//				if(!(p.charAt(pt)=='*'&&p.charAt(pt-1)=='*')){
+//					sb.append(p.charAt(pt));
+//				}
+//			}
+//			pt++;
+//		}
+//		p=sb.toString();
+//		setNumberOfWildCard(p);
+//        return checkMatch(s,p,0,0);
+//    }
 	
 	private void setNumberOfWildCard(String p){
 		int count=0;
