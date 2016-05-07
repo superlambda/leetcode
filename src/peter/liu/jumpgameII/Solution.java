@@ -27,10 +27,24 @@ public class Solution {
 	private int minimumStep=Integer.MAX_VALUE;
 	
 	private Map<String,Integer> checkedSet= new HashMap<>();
+//	public int jump(int[] nums) {
+//		jumpAt(nums, 0,0);
+//		return minimumStep;
+//    }
+	
 	public int jump(int[] nums) {
-		jumpAt(nums, 0,0);
-		return minimumStep;
-    }
+		int jumps = 0, curEnd = 0, curFarthest = 0;
+	    for (int i = 0; i < nums.length - 1; i++) {
+	        curFarthest = Math.max(curFarthest, i + nums[i]);
+	        if (i == curEnd) {
+	            jumps++;
+	            curEnd = curFarthest;
+	        }
+	    }
+	    return jumps;
+	}
+	
+	 
 	
 	private void jumpAt(int[] nums, int start, int step) {
 		if(start<nums.length){
