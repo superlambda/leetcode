@@ -57,25 +57,25 @@ public class Solution {
 			}
 			
 			boolean jumpped=false;
-			for(int i=1;i<=nums[start];i++){
-				String key=start+","+i;
-				if(nums[start+i]>nums[start]-i&&(!checkedSet.containsKey(key)||checkedSet.get(key)>step)){
-					jumpped=true;
-					checkedSet.put(key,step);
-					jumpAt(nums, start+i, step+1);
+			for (int i = 1; i <= nums[start]; i++) {
+				String key = start + "," + i;
+				if (nums[start + i] > nums[start] - i && (!checkedSet.containsKey(key) || checkedSet.get(key) > step)) {
+					jumpped = true;
+					checkedSet.put(key, step);
+					jumpAt(nums, start + i, step + 1);
 				}
 			}
 			
-			if (!jumpped && start < nums.length && nums[start] > 0
-					&& (!checkedSet.containsKey(start + "," + nums[start])
-							|| checkedSet.get(start + "," + nums[start]) > step)) {
-
-				checkedSet.put(start + "," + nums[start], step);
-				start = start + nums[start];
-				step++;
-				jumpAt(nums, start, step);
-
+			if (!jumpped && start < nums.length && nums[start] > 0) {
+				String key = start + "," + nums[start];
+				if (!checkedSet.containsKey(key) || checkedSet.get(key) > step) {
+					checkedSet.put(key, step);
+					start = start + nums[start];
+					step++;
+					jumpAt(nums, start, step);
+				}
 			}
+					
 			
 		}
 	}
