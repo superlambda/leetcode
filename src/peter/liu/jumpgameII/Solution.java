@@ -33,7 +33,6 @@ public class Solution {
     }
 	
 	private void jumpAt(int[] nums, int start, int step) {
-		
 		if(start<nums.length){
 			
 			while(start<nums.length-1&&nums[start]==1){
@@ -59,14 +58,15 @@ public class Solution {
 			boolean jumpped=false;
 			for (int i = 1; i <= nums[start]; i++) {
 				String key = start + "," + i;
-				if (nums[start + i] > nums[start] - i && (!checkedSet.containsKey(key) || checkedSet.get(key) > step)) {
+				if (nums[start + i] > nums[start] - i && step < minimumStep
+						&& (!checkedSet.containsKey(key) || checkedSet.get(key) > step)) {
 					jumpped = true;
 					checkedSet.put(key, step);
 					jumpAt(nums, start + i, step + 1);
 				}
 			}
-			
-			if (!jumpped && start < nums.length && nums[start] > 0) {
+
+			if (!jumpped && start < nums.length && nums[start] > 0 && step < minimumStep) {
 				String key = start + "," + nums[start];
 				if (!checkedSet.containsKey(key) || checkedSet.get(key) > step) {
 					checkedSet.put(key, step);
