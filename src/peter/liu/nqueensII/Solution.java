@@ -13,8 +13,8 @@ import java.util.List;
  *
  */
 public class Solution {
+	private int count=0;
 	public int totalNQueens(int n) {
-		List<List<String>> result = new ArrayList<>();
 		String[] preDefinedLines = new String[n];
 		for (int i = 0; i < n; i++) {
 			StringBuffer newLine = new StringBuffer();
@@ -27,27 +27,21 @@ public class Solution {
 			}
 			preDefinedLines[i] = newLine.toString();
 		}
-		solve(result, new ArrayList<Integer>(), preDefinedLines, n);
-		return result.size();
+		solve(new ArrayList<Integer>(), preDefinedLines, n);
+		return count;
     }
 	
-	private void solve(List<List<String>> result, List<Integer> checkList, String[] preDefinedLines, int n) {
+	private void solve(List<Integer> checkList, String[] preDefinedLines, int n) {
 		if (checkList.size() < n) {
 			for (int i = 0; i < n; i++) {
 				if (canContinue(checkList, i,n)) {
 					
 					if(checkList.size()==n-1){
-						List<String> oneResult = new ArrayList<>();
-						for (Integer index : checkList) {
-							oneResult.add(preDefinedLines[index]);
-						}
-						oneResult.add(preDefinedLines[i]);
-						result.add(oneResult);
-						
+						count++;
 					}else{
 						List<Integer> newCheckList = new ArrayList<>(checkList);
 						newCheckList.add(i);
-						solve(result, newCheckList, preDefinedLines, n);
+						solve( newCheckList, preDefinedLines, n);
 					}
 				}
 			}
