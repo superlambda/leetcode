@@ -30,7 +30,7 @@ public class Solution {
 	 * The other pointer arrives at a value, say arr, that is greater than aol
 	 * before it reaches aor. In this case, we does move aol. But notice that
 	 * the volume of aol and arr is already greater than aol and aor (as it is
-	 * wider and heigher), which means that aol and aor is not the optimal
+	 * wider and higher), which means that aol and aor is not the optimal
 	 * solution -- Contradiction!
 	 * 
 	 * Both cases arrive at a contradiction.

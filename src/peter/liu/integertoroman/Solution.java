@@ -27,7 +27,7 @@ public class Solution {
 			if (num <= 0) {
 				break;
 			}
-			boolean substracted = false;
+			boolean subtracted = false;
 			if (i > 0) {
 				for (int j = 0; j < numberToSubstract.length; j++) {
 					int index = indexMapping.get(numberToSubstract[j]);
@@ -38,13 +38,13 @@ public class Solution {
 							num -= numArray[i - 1] - numberToSubstract[j];
 							sb.append(getRomanValue(numberToSubstract[j]))
 									.append(getRomanValue(numArray[i - 1]));
-							substracted = true;
+							subtracted = true;
 							break;
 						}
 					}
 				}
 			}
-			if (!substracted) {
+			if (!subtracted) {
 				if (num / numArray[i] > 0 && num / numArray[i] <= 3) {
 					while (num >= numArray[i]) {
 						num -= numArray[i];
