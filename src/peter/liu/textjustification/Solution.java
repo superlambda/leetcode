@@ -58,37 +58,25 @@ public class Solution {
         			length=0;
         			addToResult(result, line,maxWidth);
         		}else if(i==words.length-1){
-        			StringBuffer sb=new StringBuffer();
-        			while(length<maxWidth){
-        				sb.append(" ");
-        				length++;
-        			}
-        			line.add(sb.toString());
+        			appendSpace(line,length, maxWidth);
         			addToResult(result, line,maxWidth);
         		}
         		
         	}else{
-        		//extend the line length to maxWidth
-    			if(length<maxWidth){
-    				if(line.size()<=1){
-    					StringBuffer sb=new StringBuffer();
-    					while(length<maxWidth){
-    						sb.append(" ");
-    						length++;
-    					}
-    					line.add(sb.toString());
-    				}else{
-    					while(length<maxWidth){
-    						for(int j=1;j<=line.size()-1;j+=2){
-    							line.set(j, line.get(j)+" ");
-    							length++;
-    							if(length==maxWidth){
-    								break;
-    							}
-    						}
-    					}
-    				}
-    			}
+        		if(line.size()<=1){
+        			appendSpace(line,length, maxWidth);
+				}else{
+					//extend the line length to maxWidth
+					while(length<maxWidth){
+						for(int j=1;j<=line.size()-1;j+=2){
+							line.set(j, line.get(j)+" ");
+							length++;
+							if(length==maxWidth){
+								break;
+							}
+						}
+					}
+				}	
     			
     			//add the expended line to the result
     			length=0;
@@ -98,17 +86,21 @@ public class Solution {
         	}
         }
         if(!line.isEmpty()){
-        	StringBuffer sb=new StringBuffer();
-			while(length<maxWidth){
-				sb.append(" ");
-				length++;
-			}
-			line.add(sb.toString());
+        	appendSpace(line,length, maxWidth);
 			addToResult(result, line,maxWidth);
         }
         return result;
         
     }
+	
+	private void appendSpace(List<String>line,int length, int maxWidth){
+		StringBuffer sb=new StringBuffer();
+		while(length<maxWidth){
+			sb.append(" ");
+			length++;
+		}
+		line.add(sb.toString());
+	}
 	
 	private void addToResult(List<String> result, List<String> line,int maxWidth) {
 		StringBuffer newLine = new StringBuffer();
