@@ -17,59 +17,84 @@ public class Solution {
 
 	public int largestRectangleArea(int[] heights) {
 		Stack<Integer> heightStack = new Stack<>();
+		Stack<Integer> minimumHeightStack = new Stack<>();
 		int minimumHeight = Integer.MAX_VALUE;
 		for (int i = 0; i < heights.length; i++) {
 			if (heights[i] == 0) {
-				trace(0, heightStack);
+				if(!minimumHeightStack.isEmpty()){
+					trace(minimumHeightStack, heightStack);
+				}
 				heightStack = new Stack<>();
+				minimumHeightStack=new Stack<>();
 				minimumHeight = Integer.MAX_VALUE;
 			} else {
 				minimumHeight = Math.min(minimumHeight, heights[i]);
 				heightStack.push(heights[i]);
+				minimumHeightStack.push(minimumHeight);
 				largestArea = Math.max(largestArea, minimumHeight * heightStack.size());
 			}
 		}
 		if (!heightStack.isEmpty()) {
-			trace(minimumHeight, heightStack);
+			trace(minimumHeightStack, heightStack);
 		}
 		return largestArea;
 
 	}
 
-	private void trace(int checkValue, Stack<Integer> heightStack) {
-		if (heightStack.size() == 1) {
-			largestArea = Math.max(largestArea, heightStack.pop());
-		} else {
-			int minimumHeight = Integer.MAX_VALUE;
-			Stack<Integer> popedStack = new Stack<>();
-			while ((!heightStack.isEmpty()) && heightStack.peek() > checkValue) {
-				minimumHeight = Math.min(minimumHeight, heightStack.peek());
-				popedStack.push(heightStack.pop());
-			}
+	private void trace(Stack<Integer> minimumHeightStack, Stack<Integer> heightStack) {
 
-			if (!popedStack.isEmpty()) {
-				largestArea = Math.max(largestArea, minimumHeight * popedStack.size());
-				trace(minimumHeight, popedStack);
-			}
+		
+		Stack<Integer> popedStack = new Stack<>();
+		Stack<Integer> popedMinimumHeightStack = new Stack<>();
+		//split
+		int checkValue = minimumHeightStack.peek(); 
+		int minimumHeight=Integer.MAX_VALUE;
+		while ((!heightStack.isEmpty()) && heightStack.peek() > checkValue) {
+			minimumHeight = Math.min(minimumHeight, heightStack.peek());
+			popedStack.push(heightStack.pop());
+			popedMinimumHeightStack.push(minimumHeight);
+			minimumHeightStack.pop();
+		}
 
+		if (!popedStack.isEmpty()) {
+			largestArea = Math.max(largestArea, minimumHeight * popedStack.size());
+			while((!popedMinimumHeightStack.isEmpty())&&popedMinimumHeightStack.peek().equals(popedStack.peek())){
+				popedMinimumHeightStack.pop();
+				popedStack.pop();
+				if(!popedStack.isEmpty()){
+					largestArea = Math.max(largestArea, popedMinimumHeightStack.peek() * popedMinimumHeightStack.size());
+				}
+				
+			}
+			
+			if(!popedStack.isEmpty()){
+				trace(popedMinimumHeightStack, popedStack);
+			}
+			
+		}
+		//left value
+		if (!heightStack.isEmpty()) {
+			heightStack.pop();
+			minimumHeightStack.pop();
 			if (!heightStack.isEmpty()) {
-				heightStack.pop();
-				if (!heightStack.isEmpty()) {
-					int minimumValue = getMinimumValue(heightStack);
-					largestArea = Math.max(largestArea, minimumValue * heightStack.size());
-					trace(minimumValue, heightStack);
+				if (heightStack.size() == 1) {
+					largestArea = Math.max(largestArea, heightStack.pop());
+				} else {
+					largestArea = Math.max(largestArea, minimumHeightStack.peek() * heightStack.size());
+					while((!minimumHeightStack.isEmpty())&&minimumHeightStack.peek().equals(heightStack.peek())){
+						minimumHeightStack.pop();
+						heightStack.pop();
+						if(!heightStack.isEmpty()){
+							largestArea = Math.max(largestArea, minimumHeightStack.peek() * minimumHeightStack.size());
+						}
+						
+					}
+					if(!minimumHeightStack.isEmpty()){
+						trace(minimumHeightStack, heightStack);
+					}
 				}
 			}
 		}
-
-	}
-
-	private int getMinimumValue(Stack<Integer> heightStack) {
-		int minimumValue = Integer.MAX_VALUE;
-		for (int i = 0; i < heightStack.size(); i++) {
-			minimumValue = Math.min(minimumValue, heightStack.get(i));
-		}
-		return minimumValue;
 	}
 
 }
