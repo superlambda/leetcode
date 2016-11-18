@@ -3,10 +3,12 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +17,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.wuerth.phoenix.basic.etnax.common.utilsdir.DoubleUtils;
+
 /**
  * BIDateMapping
  * 
@@ -22,6 +26,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * 
  */
 public class BIDateMapping {
+	
+	public static String							csvSeperator				= ";";
 	public static Map<String, String>	companyCodeMap	= new HashMap<String, String>();
 
 	public static Map<String, String>	salesOrgMap		= new HashMap<String, String>();
@@ -526,7 +532,7 @@ public class BIDateMapping {
 			ws1CustomerNumber = "902000";
 		} else if (accountNumber == 700019) {
 			ws1CustomerNumber = "903000";
-		}else if (name1 .contains("Staff")){
+		}else if (name1.contains("Staff")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
 		}else if (name1.contains("Wurth")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
@@ -546,4 +552,180 @@ public class BIDateMapping {
 		iiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 		iiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 	}
+	
+	public static void writeInvoiceItemHeaderToCSV(PrintWriter out1) {
+		StringBuffer sb = new StringBuffer();
+		String[] header1 = { "CSALESORG", "CTERREP", "CBOD", "CPLT", "CCUST", "CCBILLTO", "CCSHIPTO", "CCPAYER",
+				"DORDENTRY", "CORDNO", "CORDREAS", "CORDCATS", "CDOCTYPE", "CDOCCAT", "CMAT", "CORDITM", "QIXQUOR",
+				"CPRKEY", "DBILL", "CBILLNO", "CBILLTYPE", "CBILLITM", "QIXQUSU", "NIXINIT", "CORDCRED", "NIXCNIT",
+				"CREACOMP", "LIITO", "LIGTO", "LINTO", "LINDC", "LIN_PS", "LIXPRB", "LIN_FR", "LINPP", "LINMP",
+				"LIXXTAX", "QIWTNTKG" };
+		for (int i = 0; i < header1.length; i++) {
+			sb.append(header1[i]).append(csvSeperator);
+		}
+		out1.println(sb.toString());
+		
+		
+		sb = new StringBuffer();
+		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
+				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
+				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
+				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
+				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity", "Price Key",
+				"Billing Date", "Billing Document Number", "Billing Type", "Billing Item", "Billing Quantity",
+				"Number of Invoice Document Items", "Order/Credit Note", "Number of Credit Note Items",
+				"Complaint Reason", "Turnover", "Gross Value", "Net Value/Customer Turnover", "Discount",
+				"Price Increase Surcharge", "Basis Price", "Freight Costs", "Cost of Goods PFEP", "Cost of Goods GLEP",
+				"Tax Amount", "Netto Weight in Kilogramms" };
+		for (int i = 0; i < header2.length; i++) {
+			sb.append(header2[i]).append(csvSeperator);
+		}
+		out1.println(sb.toString());
+		out1.flush();
+	}
+	
+	// Sales Organization
+		// Sales Rep WS1
+		// Branch Office Did the Deal WS1
+		// Delivery Plant WS1
+		// Customer Number (Sold-to-Party) WS1
+		// Customer Number (Bill-to-Party) WS1
+		// Customer Number (Ship-to-Party) WS1
+		// Customer Number (Payer) WS1
+		// Order Document Entry Date
+		// Order Document
+		// Order Reason
+		// Order Category (Statistic)
+		// Sales Document Type
+		// Sales Document Category
+		// Article Number WS1
+		// Order Document Item
+		// Order Quantity
+		// Price Key
+		// Billing Date
+		// Billing Document Number
+		// Billing Type
+		// Billing Item
+		// Billing Quantity
+		// Number of Invoice Document Items
+		// Order/Credit Note
+		// Number of Credit Note Items
+		// Complaint Reason
+		// Turnover
+		// Gross Value
+		// Net Value/Customer Turnover
+		// Discount
+		// Price Increase Surcharge
+		// Basis Price
+		// Freight Costs
+		// Cost of Goods PFEP
+		// Cost of Goods GLEP
+		// Tax Amount
+		// Netto Weight in Kilogramms
+
+		public static void writeInvoiceItemInfoToTxt(List<InvoiceItemInformationBean> invoiceItemInfoList, PrintWriter out1,
+				int numberOfInvoiceItems) {
+			for (int i = 0; i < invoiceItemInfoList.size(); i++) {
+				InvoiceItemInformationBean iiib = invoiceItemInfoList.get(i);
+				StringBuffer sb = new StringBuffer();
+				// Sales Organization
+				sb.append(iiib.getWs1SalesOrganisation()).append(BIDateMapping.csvSeperator);
+				// Sales Rep WS1
+				sb.append(iiib.getWs1RegisterNumber()).append(BIDateMapping.csvSeperator);
+				// Branch Office Did the Deal WS1
+				sb.append(iiib.getPlant()).append(BIDateMapping.csvSeperator);
+				// Delivery Plant WS1
+				sb.append(iiib.getDeliveryPlant()).append(BIDateMapping.csvSeperator);
+				// Customer Number (Sold-to-Party) WS1
+				sb.append(iiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
+				// TODO Customer Number (Bill-to-Party) WS1
+				sb.append(iiib.getCustomerNumber()).append(BIDateMapping.csvSeperator);
+				// TODO Customer Number (Ship-to-Party) WS1
+				sb.append(iiib.getGoodsRecipient()).append(BIDateMapping.csvSeperator);
+				// TODO Customer Number (Payer) WS1
+				sb.append(iiib.getDebtor()).append(BIDateMapping.csvSeperator);
+				// Order Document Entry Date
+				if (iiib.getOrderDate() != null) {
+					sb.append(BIDateMapping.dateFormat.format(iiib.getOrderDate())).append(BIDateMapping.csvSeperator);
+				} else {
+					sb.append(" ").append(BIDateMapping.csvSeperator);
+				}
+
+				// Order Document
+				sb.append(iiib.getOrderNumber()).append(BIDateMapping.csvSeperator);
+				// Order Reason
+				sb.append(iiib.getOrderReason()).append(BIDateMapping.csvSeperator);
+				// TODO Order Category (Statistic)
+				sb.append(iiib.getOrderCategory()).append(BIDateMapping.csvSeperator);
+				// TODO Sales Document Type
+				sb.append(iiib.getSalesDocumentType()).append(BIDateMapping.csvSeperator);
+				// TODO Sales Document Category
+				sb.append(iiib.getDocumentCategory()).append(BIDateMapping.csvSeperator);
+
+				// Article Number WS1
+				sb.append(iiib.getArticleNumber()).append(BIDateMapping.csvSeperator);
+
+				// Order Document Item
+				sb.append(iiib.getOrderItem()).append(BIDateMapping.csvSeperator);
+				// Order Quantity
+				sb.append(iiib.getOrderQuantity()).append(BIDateMapping.csvSeperator);
+				// Price Key
+				sb.append(BIDateMapping.getPriceUnitMapping(iiib.getPriceUnit())).append(BIDateMapping.csvSeperator);
+
+				// Billing Date
+				if (iiib.getInvoiceDate() != null) {
+					sb.append(BIDateMapping.dateFormat.format(iiib.getInvoiceDate())).append(BIDateMapping.csvSeperator);
+				} else {
+					sb.append(" ").append(BIDateMapping.csvSeperator);
+				}
+				// Billing Document Number
+				sb.append(BIDateMapping.fillWS1OrderOrInvoiceNumber(iiib.getInvoiceNumber()))
+						.append(BIDateMapping.csvSeperator);
+				// Billing Type
+				sb.append(iiib.getDocumentType()).append(BIDateMapping.csvSeperator);
+				// Billing Item
+				sb.append(iiib.getInvoiceItem()).append(BIDateMapping.csvSeperator);
+				// Billing Quantity
+				sb.append(iiib.getInvoiceQuantity()).append(BIDateMapping.csvSeperator);
+				// Number of Invoice Document Items
+				sb.append(iiib.getNumberOfInvoiceDocumentItems()).append(BIDateMapping.csvSeperator);
+				// Order/Credit Note, If it is an Order then 'A', if Credit Note
+				// then 'G'
+				sb.append(iiib.getOrderCreditNoteSign()).append(BIDateMapping.csvSeperator);
+				// Number of Credit Note Items, set what in this column?
+				sb.append(iiib.getNumberOfCreditNoteItems()).append(BIDateMapping.csvSeperator);
+				// Complaint Reason
+				sb.append(" ").append(BIDateMapping.csvSeperator);
+				// Turnover
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getTurnover())).append(BIDateMapping.csvSeperator);
+				// LOGTO Gross Value
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getGrossValue())).append(BIDateMapping.csvSeperator);
+				// LONTO Net Value/Customer Turnover
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getNetValue())).append(BIDateMapping.csvSeperator);
+				// Discount
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getDiscount())).append(BIDateMapping.csvSeperator);
+
+				// Price Increase Surcharge No logic, just correct format; if not
+				// available use LOGTO minus LONTO; If the Document is a Creditnote,
+				// put a minus in front of the Keyfigure
+				sb.append("0.00").append(BIDateMapping.csvSeperator);
+				// Basis Price
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getPrice())).append(BIDateMapping.csvSeperator);
+				// TODO Freight Costs, is on header level, how to calculate it on
+				// line level.
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getFreightCost())).append(BIDateMapping.csvSeperator);
+				// Cost of Goods PFEP
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getCogspfep())).append(BIDateMapping.csvSeperator);
+				// Cost of Goods GLEP
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getCogsglep())).append(BIDateMapping.csvSeperator);
+				// Tax Amount
+				sb.append(DoubleUtils.getRoundedAmount(iiib.getTaxAmount())).append(BIDateMapping.csvSeperator);
+				// Netto Weight in Kilogramms
+				sb.append(FormatHelper.getWeightFormat().format(iiib.getWeight())).append(BIDateMapping.csvSeperator);
+				out1.println(sb.toString());
+				numberOfInvoiceItems++;
+			}
+			System.out.println("\n Number of Invoice Item writed in txt: " + numberOfInvoiceItems);
+			out1.flush();
+		}
 }
