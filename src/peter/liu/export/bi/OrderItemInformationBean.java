@@ -66,6 +66,43 @@ public class OrderItemInformationBean {
 	
 	private double orderValue;
 	private double discount;
+	
+	private String name1;
+	
+	private int goodsRecipient;
+	private int debtor;
+	private String WarehouseNumber;
+	
+	private String orderReason;
+	private String orderCategory;
+	private String documentCategory;
+	private String salesDocumentType;
+	private double  freightCost;
+	private double	taxAmount;
+	
+	public int getGoodsRecipient() {
+		return goodsRecipient;
+	}
+
+	public void setGoodsRecipient(int goodsRecipient) {
+		this.goodsRecipient = goodsRecipient;
+	}
+
+	public int getDebtor() {
+		return debtor;
+	}
+
+	public void setDebtor(int debtor) {
+		this.debtor = debtor;
+	}
+
+	public String getName1() {
+		return name1;
+	}
+
+	public void setName1(String name1) {
+		this.name1 = name1;
+	}
 
 	public double getDiscount() {
 		return discount;
@@ -298,4 +335,61 @@ public class OrderItemInformationBean {
 	public void setPlant(String plant) {
 		this.plant = plant;
 	}
+
+	public String getWarehouseNumber() {
+		return WarehouseNumber;
+	}
+
+	public void setWarehouseNumber(String warehouseNumber) {
+		WarehouseNumber = warehouseNumber;
+	}
+
+	public String getOrderReason() {
+		return orderReason;
+	}
+
+	public void setOrderReason(String orderReason) {
+		this.orderReason = orderReason;
+	}
+
+	public String getOrderCategory() {
+		return orderCategory;
+	}
+
+	public void setOrderCategory(String orderCategory) {
+		this.orderCategory = orderCategory;
+	}
+
+	public String getDocumentCategory() {
+		return documentCategory;
+	}
+
+	public void setDocumentCategory(String documentCategory) {
+		this.documentCategory = documentCategory;
+	}
+
+	public String getSalesDocumentType() {
+		return salesDocumentType;
+	}
+
+	public void setSalesDocumentType(String salesDocumentType) {
+		this.salesDocumentType = salesDocumentType;
+	}
+
+	public double getFreightCost() {
+		return freightCost;
+	}
+
+	public void setFreightCost(double freightCost) {
+		this.freightCost = freightCost;
+	}
+
+	public double getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(double taxAmount) {
+		this.taxAmount = taxAmount;
+	}
+	
 }

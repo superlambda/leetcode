@@ -13,6 +13,7 @@ import com.wuerth.phoenix.Phxbasic.models.CustomerAccount;
 import com.wuerth.phoenix.Phxbasic.models.CustomerInvoiceLine;
 import com.wuerth.phoenix.Phxbasic.models.CustomerOrderLine;
 import com.wuerth.phoenix.Phxbasic.models.DWCreditNoteLine;
+import com.wuerth.phoenix.Phxbasic.models.DWFreightCostLine;
 import com.wuerth.phoenix.Phxbasic.models.DWPriceLine;
 import com.wuerth.phoenix.Phxbasic.models.DWRetoureLine;
 import com.wuerth.phoenix.Phxbasic.models.DebitNoteNumber;
@@ -283,6 +284,10 @@ public class CreditNoteItemExport extends BatchRunner {
 					}
 				} else {
 					// DWManualLine manualLine = (DWManualLine) creditNoteLine;
+					if(creditNoteLine.getFromComplaitLineType().equals(ComplaintLineType.FREIGHTLINE)){
+						DWFreightCostLine dwfcl = (DWFreightCostLine)creditNoteLine;
+						iiib.setFreightCost(dwfcl.getNewFreightCosts().getAmount()-dwfcl.getOldFreightCosts().getAmount());
+					}
 					iiib.setDocumentType("ZG2");
 					iiib.setPrice(creditNoteLine.getCcBrutCreditAmount().getAmount()
 							+ creditNoteLine.getCcDiscountCreditAmount().getAmount());
@@ -347,7 +352,6 @@ public class CreditNoteItemExport extends BatchRunner {
 		iiib.setTurnover(iiib.getNetValue());
 		iiib.setGrossValue(iiib.getGrossValue() * (-1));
 		iiib.setTaxAmount(iiib.getTaxAmount() * (-1));
-		iiib.setFreightCost(iiib.getFreightCost() * (-1));
 		iiib.setCogsglep(iiib.getCogsglep() * (-1));
 		iiib.setCogspfep(iiib.getCogspfep() * (-1));
 		iiib.setWeight(iiib.getWeight() * (-1));

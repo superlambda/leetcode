@@ -26,17 +26,16 @@ public class CASAPeriodBean {
 	private PDate	currentPeriodPreviousYearToDate;
 
 	// Turnover 12 periods rolling
-	// private CompanyPeriod elevenPeriodAgo;
 	private PDate	elevenPeriodAgoFromDate;
 
-	// private CompanyPeriod twelvePeriodAgo;
 	private PDate	twelvePeriodAgoFromDate;
 	private PDate	twelvePeriodAgoToDate;
 	
 	private PDate   thirteenPeriodAgoToDate;
 
-	// private CompanyPeriod twentythreePeriodAgo;
 	private PDate	twentythreePeriodAgoFromDate;
+	
+	private PDate  twentyfourPeriodAgoToDate;
 
 	public int getYearAndPeriod() {
 		return yearAndPeriod;
@@ -126,6 +125,14 @@ public class CASAPeriodBean {
 
 	public void setThirteenPeriodAgoToDate(PDate thirteenPeriodAgoToDate) {
 		this.thirteenPeriodAgoToDate = thirteenPeriodAgoToDate;
+	}
+
+	public PDate getTwentyfourPeriodAgoToDate() {
+		return twentyfourPeriodAgoToDate;
+	}
+
+	public void setTwentyfourPeriodAgoToDate(PDate twentyfourPeriodAgoToDate) {
+		this.twentyfourPeriodAgoToDate = twentyfourPeriodAgoToDate;
 	}
 	
 	

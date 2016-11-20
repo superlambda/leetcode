@@ -3,7 +3,6 @@ package com.wuerth.phoenix.basic.etnax.utilities.sap.export.bi;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,31 +34,38 @@ import com.wuerth.phoenix.util.weight.WeightController;
  */
 public class OrderItemExport extends BatchRunner {
 
-	private int								NUMBER_OF_BATCH_TO_FECTCH	= 1000;
+	private int NUMBER_OF_BATCH_TO_FECTCH = 1000;
 
-	LinkedList<OrderItemInformationBean>	orderItemInfoList			= new LinkedList<OrderItemInformationBean>();
+	LinkedList<OrderItemInformationBean> orderItemInfoList = new LinkedList<OrderItemInformationBean>();
 
-	private String							targetTxt2012				= "../../var/exportSAP/MappingOrderItems-2012.txt";
-
-	private String							targetTxt2013				= "../../var/exportSAP/MappingOrderItems-2013.txt";
-	private String							targetTxt2014				= "../../var/exportSAP/MappingOrderItems-2014.txt";
-
-	private PrintWriter						out1						= null;
-
-	private String							csvSeperator				= ",";
-
-	private int								numberOfOrderItems		= 0;
-
-	private String							ownCompanyName;
-	
+	private String targetTxt2015 = "../../var/exportSAP/MappingOrderItems-2015.csv";
+	private String targetTxt2016 = "../../var/exportSAP/MappingOrderItems-2016.csv";
+	private String targetTxt2017 = "../../var/exportSAP/MappingOrderItems-2014.csv";
+	private boolean isTest = false;
+	private boolean isAll = false;
+	private boolean isFirstRound = false;
+	private boolean isFinalRound = false;
+	private int year = 2015;
+	private PrintWriter out1 = null;
+	private int numberOfOrderItems = 0;
+	private String ownCompanyName;
 
 	@Override
-	protected void batchMethod() throws TimestampException, PUserException,
-			IOException {
+	protected void batchMethod() throws TimestampException, PUserException, IOException {
 		ownCompanyName = _controller.getSingletonOwnCompany().getName();
-		searchOrderItem(2012, targetTxt2012);
-		searchOrderItem(2013, targetTxt2013);
-		searchOrderItem(2014, targetTxt2014);
+		if (isTest) {
+			searchOrderItem(year, targetTxt2015);
+		} else if (isFirstRound) {
+			searchOrderItem(2015, targetTxt2015);
+		} else if (isFinalRound) {
+			searchOrderItem(2017, targetTxt2017);
+		} else if (isAll) {
+			searchOrderItem(2015, targetTxt2015);
+			searchOrderItem(2016, targetTxt2016);
+			searchOrderItem(2017, targetTxt2017);
+		} else {
+			searchOrderItem(year, targetTxt2015);
+		}
 		System.out.println("\n[OK]");
 	}
 
@@ -70,72 +76,123 @@ public class OrderItemExport extends BatchRunner {
 		new OrderItemExport().startBatch(args);
 	}
 
-	private void searchOrderItem(int year, String targetTxt)
-			throws TimestampException, PUserException, IOException {
+	protected void processargs(String[] args) {
+		for (String argstr : args) {
+			if (argstr.equalsIgnoreCase("commit")) {
+				willcommit = true;
+			} else if (argstr.equalsIgnoreCase("test")) {
+				isTest = true;
+				targetTxt2015 = "../../var/exportSAP/MappingOrderItems-test-2015.csv";
+			} else if (argstr.equalsIgnoreCase("all")) {
+				isAll = true;
+			} else if (argstr.equalsIgnoreCase("first")) {
+				isFirstRound = true;
+				targetTxt2015 = "../../var/exportSAP/MappingOrderItems-201512.csv";
+			} else if (argstr.equalsIgnoreCase("final")) {
+				isFinalRound = true;
+				targetTxt2017 = "../../var/exportSAP/MappingOrderItems-201702.csv";
+				year = 2017;
+			} else if (argstr.startsWith("201")) {
+				if (argstr == "2015") {
+					year = 2015;
+				} else if (argstr == "2016") {
+					year = 2016;
+				} else if (argstr == "2017") {
+					year = 2017;
+				}
+			} else {
+				throw new RuntimeException("Arguments is not supported by the tool!");
+			}
+		}
+	}
+
+	protected void usage() {
+		System.out.println("-args test \n\ttest : Only output order lines in date 20151201-20151204");
+		System.out.println("-args first \n\tfirst : Only output order lines in date 20151201-20151231");
+		System.out.println("-args final \n\tfinal : Only output order lines in date 20170201-20170228");
+		System.out.println(
+				"-args all \n\tall : Output order lines between year 2014 and 2016, each year has a output file");
+		System.out.println("-args 2015, 2016 or 2017 \n\tall : Output order lines in 2015 or 2016 or 2017");
+		System.out.println("output file are in path ../../var/exportSAP/ start with MappingOrderItems-");
+	}
+
+	private void searchOrderItem(int year, String targetTxt) throws TimestampException, PUserException, IOException {
 		FileWriter outFile = new FileWriter(targetTxt);
 		out1 = new PrintWriter(outFile);
-
+		writeInvoiceItemHeaderToCSV(out1);
 		QueryHelper qh = Query.newQueryHelper();
 		qh.setClass(DWCustomerOrderLine.class);
-		QueryPredicate p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE)
-				.gte().val(new PDate(year, 0, 1)).predicate();
-		QueryPredicate p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE)
-				.lte().val(new PDate(year, 11, 31)).predicate();
-		QueryPredicate p3 = qh.attr(DWCustomerOrderLine.ORDERSTATUS).ne()
-				.val(CustomerOrderStatus.DELETED).predicate();
+		QueryPredicate p1 = null;
+		QueryPredicate p2 = null;
+		if (isTest) {
+			p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).gte().val(new PDate(year, 11, 1)).predicate();
+			p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).lte().val(new PDate(year, 11, 4)).predicate();
+		} else if (isFirstRound) {
+			p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).gte().val(new PDate(year, 11, 1)).predicate();
+			p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).lte().val(new PDate(year, 11, 31)).predicate();
+		} else if (isFinalRound) {
+			p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).gte().val(new PDate(year, 1, 1)).predicate();
+			p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).lte().val(new PDate(year, 1, 28)).predicate();
+		} else if (year == 2017 && !isFinalRound) {
+			p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).gte().val(new PDate(year, 0, 1)).predicate();
+			p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).lte().val(new PDate(year, 0, 31)).predicate();
+		} else {
+			p1 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).gte().val(new PDate(year, 0, 1)).predicate();
+			p2 = qh.attr(DWCustomerOrderLine.CUSTOMERORDERDATE).lte().val(new PDate(year, 11, 31)).predicate();
+		}
+
+		QueryPredicate p3 = qh.attr(DWCustomerOrderLine.ORDERSTATUS).ne().val(CustomerOrderStatus.DELETED).predicate();
 
 		qh.setDeepSelect(true);
 		qh.addAscendingOrdering(DWCustomerOrderLine.CUSTOMERORDERNUMBER);
 		qh.addAscendingOrdering(DWCustomerOrderLine.LINENUMBER);
-		
-		Condition cond = null;
-		if(year!=2014){
-			cond=qh.condition(p1.and(p2).and(p3));
-		}else{
-			cond=qh.condition(p1.and(p3));
-		}
-		PEnumeration penum = _controller.createIteratorFactory()
-				.getCursorFetch(cond);
+
+		Condition cond = qh.condition(p1.and(p2).and(p3));
+		System.out.println("QueryString " + Query.getQueryString(cond));
+		PEnumeration penum = _controller.createIteratorFactory().getCursorFetch(cond);
 		while (penum.hasMoreElements()) {
 			List<DWCustomerOrderLine> list = new ArrayList<DWCustomerOrderLine>(
 					penum.nextBatch(NUMBER_OF_BATCH_TO_FECTCH));
 			orderItemInfoList = new LinkedList<OrderItemInformationBean>();
 			System.out.println("\n(!) Write txt file  start.\n");
 			for (DWCustomerOrderLine orderLine : list) {
-				CustomerOrderLine col = _controller.lookupCustomerOrder(
-						orderLine.getCustomerOrderNumber())
+				CustomerOrderLine col = _controller.lookupCustomerOrder(orderLine.getCustomerOrderNumber())
 						.lookupCustomerOrderLine(orderLine.getLineNumber());
 
-				// That means the customer order line was deleted but dwcustomerorderline not synchronized.
+				// That means the customer order line was deleted but
+				// dwcustomerorderline not synchronized.
 				if (col == null) {
 					continue;
 				}
 
 				OrderItemInformationBean oiib = new OrderItemInformationBean();
 				oiib.setDocumentType("ZTA");
-				oiib.setPrice(orderLine.getPrice().getAmount()
-						/ orderLine.getPrice().getUnit());
-
-				oiib.setNetValue(orderLine.getCcNetAmountCustomerOrderLine()
-						.getAmount());
-				oiib.setGrossValue(oiib.getNetValue() * 1.17);
-
-				oiib.setCustomerNumber(orderLine.getDWCustomerOrder()
-						.getDWCustomer().getAccountNumber());
-				
+				oiib.setPrice(orderLine.getPrice().getAmount() / orderLine.getPrice().getUnit());
+				oiib.setCustomerNumber(orderLine.getDWCustomerOrder().getDWCustomer().getAccountNumber());
 				oiib.setOrderCreditNoteSign('A');
-				String productNumber=orderLine.getDWProduct().getProductNumber();
-				String eeeeProductNumber=BIDateMapping.productMap.get(productNumber);
-				if(eeeeProductNumber!=null&&!eeeeProductNumber.trim().equals("")){
+				oiib.setName1(orderLine.getDWCustomerOrder().getDWCustomer().getName1());
+				oiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
+				oiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+				oiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
+				oiib.setOrderValue(orderLine.getCcLineAmountCustomerOrderLine().getAmount());
+				oiib.setNetValue(orderLine.getCcNetAmountCustomerOrderLine().getAmount());
+				// TODO How to add rebate here
+				oiib.setGrossValue(oiib.getNetValue());
+				oiib.setDiscount(oiib.getOrderValue() * orderLine.getDiscount() / 100);
+				if (orderLine.getLineNumber() == 1) {
+					oiib.setFreightCost(orderLine.getDWCustomerOrder().getCcFreightCost().getAmount());
+				}
+				oiib.setTaxAmount((oiib.getNetValue()+oiib.getFreightCost())*0.15);
+				String productNumber = orderLine.getDWProduct().getProductNumber();
+				String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
+				if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
 					oiib.setArticleNumber(eeeeProductNumber);
-				}else{
+				} else {
 					oiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
 				}
-				
-				oiib.setRegisterNumber(orderLine.getDWCustomerOrder()
-						.getDWSalesman().getRegisterNumber());
-				Product product = _controller.lookupProduct(orderLine
-						.getDWProduct().getProductNumber());
+
+				oiib.setRegisterNumber(orderLine.getDWCustomerOrder().getDWSalesman().getRegisterNumber());
+				Product product = _controller.lookupProduct(orderLine.getDWProduct().getProductNumber());
 				oiib.setPriceUnit(orderLine.getPrice().getUnit());
 
 				oiib.setOrderItem(orderLine.getLineNumber());
@@ -144,27 +201,14 @@ public class OrderItemExport extends BatchRunner {
 
 				oiib.setOrderQuantity(orderLine.getOrderQuantity().getAmount());
 				OwnCompany oc = _controller.getSingletonOwnCompany();
-				Weight weight = WeightController.getNewWeight(0, oc
-						.getDefaultWeightPerUnit().getWeightMeasureUnit());
-				weight = weight
-						.add(product
-								.getOwnCompanyProductSalesUnit()
-								.getWeight()
-								.getNormalizedAmount()
-								.multiply(
-										orderLine.getDeliveredQuantity()
-												.getAmount()));
+				Weight weight = WeightController.getNewWeight(0, oc.getDefaultWeightPerUnit().getWeightMeasureUnit());
+				weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
+						.multiply(orderLine.getDeliveredQuantity().getAmount()));
 				oiib.setWeight(weight.getAmount());
-				// oiib.setWeightUnit(product.getOwnCompanyProductSalesUnit()
-				// .getWeight().getWeightMeasureUnit()
-				// .getDescription());
 				if (col.getWarehouseOrderLineMain() != null
-						&& col.getWarehouseOrderLineMain()
-								.getAllPickingReservation() != null
-						&& col.getWarehouseOrderLineMain()
-								.getAllPickingReservation().size() > 0) {
-					PickingReservation pr = (PickingReservation) col
-							.getWarehouseOrderLineMain()
+						&& col.getWarehouseOrderLineMain().getAllPickingReservation() != null
+						&& col.getWarehouseOrderLineMain().getAllPickingReservation().size() > 0) {
+					PickingReservation pr = (PickingReservation) col.getWarehouseOrderLineMain()
 							.getAllPickingReservation().get(0);
 					oiib.setStorageLocation(pr.getFullLocationName());
 				} else {
@@ -172,21 +216,18 @@ public class OrderItemExport extends BatchRunner {
 				}
 
 				double glep = orderLine.getCostPrice().getAmount();
-				// oiib.setGlep(glep);
-				// oiib.setPfep(glep * 1.085);
 				oiib.setCogsglep(glep * oiib.getOrderQuantity());
-				oiib.setCogspfep(oiib.getCogsglep() * 1.085);
-				//TODO How to calculate discount
-				//oiib.setDiscount(orderLine.getDiscount());
-				if(oiib.getPriceUnit()==10000){
+				oiib.setCogspfep(oiib.getCogsglep() / 1.1);
+				// TODO How to calculate discount
+				// oiib.setDiscount(orderLine.getDiscount());
+				if (oiib.getPriceUnit() == 10000) {
 					oiib.setPriceUnit(1000);
-					oiib.setPrice(oiib.getPrice()/10);
+					oiib.setPrice(oiib.getPrice() / 10);
 				}
 				fillWS1Information(oiib);
 				orderItemInfoList.addLast(oiib);
-				System.out.println("\n Number of order items loaded: "
-						+ orderItemInfoList.size());
 			}
+			System.out.println("\n Number of order items loaded: " + orderItemInfoList.size());
 			writeOrderItemInfoToTxt();
 			_context.commit();
 		}
@@ -195,173 +236,135 @@ public class OrderItemExport extends BatchRunner {
 		System.out.println("\n(*) Write txt file  end.");
 
 	}
-	
+
 	private void fillWS1Information(OrderItemInformationBean oiib) {
-		String customerOrg = BIDateMapping.customerOrgMap.get(oiib
-				.getCustomerNumber());
-		String defaultWS1RegisterNumber=null;
-		if (customerOrg != null) {
-			String[] customerOrgArray = customerOrg.split(",");
-			oiib.setWs1CustomerNumber(customerOrgArray[0]);
-			oiib.setWs1SalesOrganisation(customerOrgArray[1]);
-			defaultWS1RegisterNumber=customerOrgArray[2];
-		} else {
-			if (ownCompanyName.equals("伍尔特（重庆）五金工具有限公司")) {
-				oiib.setWs1CustomerNumber("0000999921");
-				oiib.setWs1SalesOrganisation("8807");
-			} else {
-				oiib.setWs1CustomerNumber("0000999921");
-				oiib.setWs1SalesOrganisation("8805");
-			}
-			System.out.println("\n Customer mapping can not find : "
-					+ oiib.getCustomerNumber());
-		}
-
-		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib
-				.getWs1SalesOrganisation()));
-
-		String ws1RegisterNumber = BIDateMapping.getWS1RegisterNumber(
-				ownCompanyName, oiib.getRegisterNumber());
-		if (BIDateMapping.isWS1RUDUmmyRU(ws1RegisterNumber)
-				&& defaultWS1RegisterNumber != null) {
-			ws1RegisterNumber = defaultWS1RegisterNumber;
-		}
-		if (oiib.getWs1CustomerNumber().equals("0000999921")) {
-			ws1RegisterNumber = BIDateMapping.getDummyWS1RegisterNumber();
-		}
-		oiib.setWs1RegisterNumber(ws1RegisterNumber);
+		oiib.setWs1SalesOrganisation("3120");
+		oiib.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(oiib.getCustomerNumber(), oiib.getName1()));
+		oiib.setWs1RegisterNumber("0000" + oiib.getRegisterNumber());
+		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
+		oiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
+		oiib.setOrderReason("001");
+		oiib.setOrderCategory("1");
+		oiib.setSalesDocumentType("");
+		oiib.setDocumentCategory("C");
 	}
-	
-//	CSALESORG	Sales Organization
-//	CTERREP	Sales Rep WS1
-//	CBOD	Branch Office Did the Deal WS1
-//	CPLT	Delivery Plant WS1
-//	CCUST	Customer Number (Sold-to-Party) WS1
-//	CCBILLTO	Customer Number (Bill-to-Party) WS1
-//	CCSHIPTO	Customer Number (Ship-to-Party) WS1
-//	CCPAYER	Customer Number (Payer) WS1
-//	DORDENTRY	Order Document Entry Date
-//	CORDNO	Order Document
-//	CORDREAS	Order Reason
-//	CORDCATS	Order Category (Statistic)
-//	CDOCTYPE	Sales Document Type
-//	CDOCCAT	Sales Document Category
-//	CMAT	Article Number WS1
-//	CORDITM	Order Document Item
-//	QOXQUOR	Order Quantity
-//	NOXORIT	Number of Order Items
-//	CPRKEY	Price Key
-//	CORDCRED	Order/Credit Note
-//	CREACOMP	Complaint Reason
-//	LOITO	Order Value
-//	LOGTO	Gross Value
-//	LONTO	Net Value
-//	LONDC	Discount
-//	LON_PS	Price Increase Surcharge
-//	LOXPRB	Basis Price
-//	LON_FR	Freight Costs
-//	LONPP	Cost Value PFEP
-//	LONMP	Cost Value GLD
-//	LOX_TAX	Tax Amount
-//	QOWTNTKG	Gross Weight in Kilogramms
-	
+
+	// CSALESORG Sales Organization
+	// CTERREP Sales Rep WS1
+	// CBOD Branch Office Did the Deal WS1
+	// CPLT Delivery Plant WS1
+	// CCUST Customer Number (Sold-to-Party) WS1
+	// CCBILLTO Customer Number (Bill-to-Party) WS1
+	// CCSHIPTO Customer Number (Ship-to-Party) WS1
+	// CCPAYER Customer Number (Payer) WS1
+	// DORDENTRY Order Document Entry Date
+	// CORDNO Order Document
+	// CORDREAS Order Reason
+	// CORDCATS Order Category (Statistic)
+	// CDOCTYPE Sales Document Type
+	// CDOCCAT Sales Document Category
+	// CMAT Article Number WS1
+	// CORDITM Order Document Item
+	// QOXQUOR Order Quantity
+	// NOXORIT Number of Order Items
+	// CPRKEY Price Key
+	// CORDCRED Order/Credit Note
+	// CREACOMP Complaint Reason
+	// LOITO Order Value
+	// LOGTO Gross Value
+	// LONTO Net Value
+	// LONDC Discount
+	// LON_PS Price Increase Surcharge
+	// LOXPRB Basis Price
+	// LON_FR Freight Costs
+	// LONPP Cost Value PFEP
+	// LONMP Cost Value GLD
+	// LOX_TAX Tax Amount
+	// QOWTNTKG Gross Weight in Kilogramms
+
 	private void writeOrderItemInfoToTxt() {
 		for (int i = 0; i < orderItemInfoList.size(); i++) {
 			OrderItemInformationBean oiib = orderItemInfoList.get(i);
 			StringBuffer sb = new StringBuffer();
-			sb.append(oiib.getWs1SalesOrganisation()).append(csvSeperator);
-			sb.append(oiib.getWs1RegisterNumber()).append(csvSeperator);
-			sb.append(oiib.getPlant()).append(csvSeperator);
-			//TODO CPLT	Delivery Plant WS1
-			sb.append(oiib.getWs1CustomerNumber()).append(csvSeperator);
-			
+			sb.append(oiib.getWs1SalesOrganisation()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getWs1RegisterNumber()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getPlant()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getDeliveryPlant()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
 			// TODO CCBILLTO Customer Number (Bill-to-Party) WS1
-			// CCSHIPTO Customer Number (Ship-to-Party) WS1
-			// CCPAYER Customer Number (Payer) WS1
+			sb.append(oiib.getCustomerNumber()).append(BIDateMapping.csvSeperator);
+			// TODO Customer Number (Ship-to-Party) WS1
+			sb.append(oiib.getGoodsRecipient()).append(BIDateMapping.csvSeperator);
+			// TODO Customer Number (Payer) WS1
+			sb.append(oiib.getDebtor()).append(BIDateMapping.csvSeperator);
 			if (oiib.getOrderDate() != null) {
-				sb.append(BIDateMapping.dateFormat.format(oiib.getOrderDate()))
-						.append(csvSeperator);
+				sb.append(BIDateMapping.dateFormat.format(oiib.getOrderDate())).append(BIDateMapping.csvSeperator);
 			} else {
-				sb.append(" ").append(csvSeperator);
+				sb.append(" ").append(BIDateMapping.csvSeperator);
 			}
-			sb.append(
-					BIDateMapping.fillWS1OrderOrInvoiceNumber(oiib
-							.getOrderNumber())).append(csvSeperator);
+			sb.append(oiib.getOrderNumber()).append(BIDateMapping.csvSeperator);
 			// TODO CORDREAS Order Reason
-			// CORDCATS Order Category (Statistic)
-			// CDOCTYPE Sales Document Type
-			// CDOCCAT Sales Document Category
-			sb.append(oiib.getArticleNumber()).append(csvSeperator);
-			sb.append(oiib.getOrderItem()).append(csvSeperator);
-			sb.append(oiib.getOrderQuantity()).append(csvSeperator);
-			//NOXORIT	Number of Order Items
-			sb.append("1").append(csvSeperator);
-			sb.append(BIDateMapping.getPriceUnitMapping(oiib.getPriceUnit())).append(csvSeperator);
-			sb.append(oiib.getOrderCreditNoteSign()).append(csvSeperator);
-			//TODO CREACOMP	Complaint Reason
-			sb.append(" ").append(csvSeperator);
-			//TODO LOITO	Order Value
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getOrderValue())).append(csvSeperator);
-			//TODO LOGTO	Gross Value oiib.setGrossValue(oiib.getNetValue() * 1.17);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getGrossValue())).append(csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getNetValue())).append(csvSeperator);
-			//TODO LONDC	Discount
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getDiscount())).append(csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getGrossValue()-oiib.getNetValue())).append(csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getPrice())).append(csvSeperator);
-			//TODO LON_FR	Freight Costs
-			sb.append(oiib.getCogspfep());
-			sb.append(oiib.getCogsglep()).append(csvSeperator);
-			sb.append(FormatHelper.getWeightFormat().format(oiib.getWeight())).append(csvSeperator);
-			//TODO LOX_TAX	Tax Amount
-			sb.append(oiib.getDocumentType()).append(csvSeperator);
+			sb.append(oiib.getOrderReason()).append(BIDateMapping.csvSeperator);
+			// TODO Order Category (Statistic)
+			sb.append(oiib.getOrderCategory()).append(BIDateMapping.csvSeperator);
+			// TODO Sales Document Type
+			sb.append(oiib.getSalesDocumentType()).append(BIDateMapping.csvSeperator);
+			// TODO Sales Document Category
+			sb.append(oiib.getDocumentCategory()).append(BIDateMapping.csvSeperator);
+
+			sb.append(oiib.getArticleNumber()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getOrderItem()).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getOrderQuantity()).append(BIDateMapping.csvSeperator);
+			// NOXORIT Number of Order Items
+			sb.append("1").append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.getPriceUnitMapping(oiib.getPriceUnit())).append(BIDateMapping.csvSeperator);
+			sb.append(oiib.getOrderCreditNoteSign()).append(BIDateMapping.csvSeperator);
+			// CREACOMP Complaint Reason
+			sb.append(" ").append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getOrderValue())).append(BIDateMapping.csvSeperator);
+			//LOGTO Gross Value
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getGrossValue())).append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getNetValue())).append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getDiscount())).append(BIDateMapping.csvSeperator);
+			sb.append(0.00).append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getPrice())).append(BIDateMapping.csvSeperator);
+			// LON_FR Freight Costs
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getFreightCost())).append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getCogspfep())).append(BIDateMapping.csvSeperator);
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getCogsglep())).append(BIDateMapping.csvSeperator);
+			// LOX_TAX Tax Amount
+			sb.append(DoubleUtils.getRoundedAmount(oiib.getTaxAmount())).append(BIDateMapping.csvSeperator);
+			sb.append(FormatHelper.getWeightFormat().format(oiib.getWeight())).append(BIDateMapping.csvSeperator);
 			out1.println(sb.toString());
 			numberOfOrderItems++;
-			System.out.println("\n Number of Order Items writed in txt 1: "
-					+ numberOfOrderItems);
 		}
+		System.out.println("\n Number of Order Items writed in txt 1: " + numberOfOrderItems);
 	}
-	
-	
-//	private void writeOrderItemInfoToTxt() {
-//		for (int i = 0; i < orderItemInfoList.size(); i++) {
-//			OrderItemInformationBean oiib = orderItemInfoList.get(i);
-//			StringBuffer sb = new StringBuffer();
-//			sb.append(oiib.getWs1SalesOrganisation()).append(csvSeperator);
-//			sb.append(oiib.getOrderItem()).append(csvSeperator);
-//			sb.append(oiib.getDocumentType()).append(csvSeperator);
-//			sb.append(" ").append(csvSeperator);
-//			sb.append(
-//					BIDateMapping.fillWS1OrderOrInvoiceNumber(oiib
-//							.getOrderNumber())).append(csvSeperator);
-//			
-//			if (oiib.getOrderDate() != null) {
-//				sb.append(BIDateMapping.dateFormat.format(oiib.getOrderDate()))
-//						.append(csvSeperator);
-//			} else {
-//				sb.append(" ").append(csvSeperator);
-//			}
-//			sb.append(oiib.getOrderQuantity()).append(csvSeperator);
-//			sb.append(DoubleUtils.getRoundedAmount(oiib.getPrice(),10)).append(csvSeperator);
-//			sb.append(df.format(oiib.getWeight())).append(csvSeperator);
-//
-//			sb.append(DoubleUtils.getRoundedAmount(oiib.getGrossValue())).append(csvSeperator);
-//			sb.append(DoubleUtils.getRoundedAmount(oiib.getNetValue())).append(csvSeperator);
-//			sb.append(oiib.getWs1CustomerNumber()).append(csvSeperator);
-//			sb.append(oiib.getArticleNumber()).append(csvSeperator);
-//			sb.append(oiib.getWs1RegisterNumber()).append(csvSeperator);
-//			sb.append(BIDateMapping.getPriceUnitMapping(oiib.getPriceUnit())).append(csvSeperator);
-//			sb.append(
-//					BIDateMapping.fillWS1OrderOrInvoiceNumber(oiib
-//							.getOrderNumber())).append(csvSeperator);
-//			sb.append(" ").append(csvSeperator);
-//			sb.append(oiib.getPlant()).append(csvSeperator);
-//			sb.append(oiib.getCogsglep()).append(csvSeperator);
-//			sb.append(oiib.getCogspfep());
-//			out1.println(sb.toString());
-//			numberOfInvoiceItems++;
-//			System.out.println("\n Number of Order Items writed in txt 1: "
-//					+ numberOfInvoiceItems);
-//		}
-//	}
+
+	private void writeInvoiceItemHeaderToCSV(PrintWriter out1) {
+		StringBuffer sb = new StringBuffer();
+		String[] header1 = { "CSALESORG", "CTERREP", "CBOD", "CPLT", "CCUST", "CCBILLTO", "CCSHIPTO", "CCPAYER",
+				"DORDENTRY", "CORDNO", "CORDREAS", "CORDCATS", "CDOCTYPE", "CDOCCAT", "CMAT", "CORDITM", "QOXQUOR",
+				"NOXORIT", "CPRKEY", "CORDCRED", "CREACOMP", "LOITO", "LOGTO", "LONTO", "LONDC", "LON_PS", "LOXPRB",
+				"LON_FR", "LONPP", "LONMP", "LOX_TAX", "QOWTNTKG " };
+		for (int i = 0; i < header1.length; i++) {
+			sb.append(header1[i]).append(BIDateMapping.csvSeperator);
+		}
+		out1.println(sb.toString());
+
+		sb = new StringBuffer();
+		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
+				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
+				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
+				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
+				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity",
+				"Number of Order Items", "Price Key", "Order/Credit Note", "Complaint Reason", "Order Value",
+				"Gross Value", "Net Value", "Discount", "Price Increase Surcharge", "Basis Price", "Freight Costs",
+				"Cost Value PFEP", "Cost Value GLD", "Tax Amount", "Gross Weight in Kilogramms" };
+		for (int i = 0; i < header2.length; i++) {
+			sb.append(header2[i]).append(BIDateMapping.csvSeperator);
+		}
+		out1.println(sb.toString());
+		out1.flush();
+	}
 }

@@ -48,7 +48,22 @@ public class CASABean {
 
 	// COGS GLEP of current month Sample: 201208
 	private double	cogsglep_cm=0.0D;;
+	
+	// Freight cost current monthSample: 201208
+    private double	freightcost_cm=0.0D;
+    
+	private double	num_of_cn_cm=0.0D;;
 
+	private double	num_of_cn_r12cy=0.0D;;
+
+	private double	num_of_cn_r12ly=0.0D;;
+	
+	private double	num_of_ord_cm=0.0D;;
+
+	private double	num_of_ord_r12cy=0.0D;;
+
+	private double	num_of_ord_r12ly=0.0D;;
+	
 	// The calculation is based on the customer turnover of the rolling 12 months current year. If the
 	// customer has done turnover in the last 12 rolling months (Active Customer R12 CY), the customers are
 	// classified into the dedicated SML-Ranges.Sample: SML for 201208 based on 201109 - 201208
@@ -58,23 +73,46 @@ public class CASABean {
 	// based on on the customer turnover of the rolling 12 months last yearSample: SML for 201208 based on
 	// 201009 - 201108
 	private String	sml_r12ly;
+	
+	// The classification of the customers for the current month into the
+	// dedicated SML-Ranges based on on the customer Potential of the rolling 12
+	// months current year: SML for 201208 based on Potential 201109 - 201208
+	private String sml_potential_r12cy;
+	
+	// The classification of the customers potential class based on the
+	// calculated potential of rolling 12 month current year in relation to the
+	// number of employees
+	private String sml_n_potential_r12cy;
+	// The classification of the customers potential class based on the
+	// calculated potential of rolling 12 month last year in relation to the
+	// number of employees
+	private String sml_n_potential_r12ly;
 
 	// The calculation is based on the customer turnover. If the customer has done the first turnover ever in
 	// the current month and has done no turnover ever before that month, he is a new customer in the current
 	// month.
 	private boolean	newcustomer_cm;
+	
+	// If the customer has been a new customer in the last 12 month, he gets a
+	// flag 'X': 201109-201208
+	private boolean newcustomer_r12cy;
 
 	// The calculation is based on the customer turnover of the rolling 12 months current year. If the
 	// customer has done no turnover in the last 12 rolling months and has done turnover ever before these
 	// last 12 rolling months, he is a Zero Customer R12CY in the current month. Sample: For 201208 based on
 	// 201109 - 201208
 	private boolean	zerocustomer_r12cy;
+	//if the customer became a Zero customer in the current month 201208 and the field CCCASASTA is 4, set a 'X'  into the field
+	private boolean	lostcustomer_cm;
+	//If the Customer became a Zero customer in the last 12 month and the field CCCASASTA is 4, set a 'X' into the field
+	private boolean	lostcustomer_r12cy;
 
 	// The calculation is based on the customer turnover of the rolling 12 months current year. If the
 	// customer has done no turnover in the last 12 rolling months and has done again turnover in the current
 	// month, he is a Reactivated Customer R12CY in the current month.
 	private boolean	reactivatedcustomer_cm;
-
+	//If the customer has been reactivated in the last 12 month, he gets a flag 'X': 201109-201208
+	private boolean	reactivatedcustomer_r12cy;
 	// If customer has done turnover more than 500 EUR in the last rolling 12 months current year, he gets a
 	// flag 'x' Sample: For 201208 based on 201109 - 201208
 	private boolean	buyingcustomer500_r12cy;
@@ -86,6 +124,20 @@ public class CASABean {
 	private String	ws1RegisterNumber;
 
 	private int		ws1CustomerStatus;
+	
+	private String name1;
+	
+	private double potential;
+	
+	
+
+	public String getName1() {
+		return name1;
+	}
+
+	public void setName1(String name1) {
+		this.name1 = name1;
+	}
 
 	public int getPeriod() {
 		return period;
@@ -285,5 +337,125 @@ public class CASABean {
 
 	public void setTurnover_bf_cm(double turnover_bf_cm) {
 		this.turnover_bf_cm = turnover_bf_cm;
+	}
+
+	public boolean isNewcustomer_r12cy() {
+		return newcustomer_r12cy;
+	}
+
+	public void setNewcustomer_r12cy(boolean newcustomer_r12cy) {
+		this.newcustomer_r12cy = newcustomer_r12cy;
+	}
+
+	public boolean isReactivatedcustomer_r12cy() {
+		return reactivatedcustomer_r12cy;
+	}
+
+	public void setReactivatedcustomer_r12cy(boolean reactivatedcustomer_r12cy) {
+		this.reactivatedcustomer_r12cy = reactivatedcustomer_r12cy;
+	}
+
+	public boolean isLostcustomer_cm() {
+		return lostcustomer_cm;
+	}
+
+	public void setLostcustomer_cm(boolean lostcustomer_cm) {
+		this.lostcustomer_cm = lostcustomer_cm;
+	}
+
+	public boolean isLostcustomer_r12cy() {
+		return lostcustomer_r12cy;
+	}
+
+	public void setLostcustomer_r12cy(boolean lostcustomer_r12cy) {
+		this.lostcustomer_r12cy = lostcustomer_r12cy;
+	}
+
+	public String getSml_potential_r12cy() {
+		return sml_potential_r12cy;
+	}
+
+	public void setSml_potential_r12cy(String sml_potential_r12cy) {
+		this.sml_potential_r12cy = sml_potential_r12cy;
+	}
+
+	public String getSml_n_potential_r12cy() {
+		return sml_n_potential_r12cy;
+	}
+
+	public void setSml_n_potential_r12cy(String sml_n_potential_r12cy) {
+		this.sml_n_potential_r12cy = sml_n_potential_r12cy;
+	}
+
+	public String getSml_n_potential_r12ly() {
+		return sml_n_potential_r12ly;
+	}
+
+	public void setSml_n_potential_r12ly(String sml_n_potential_r12ly) {
+		this.sml_n_potential_r12ly = sml_n_potential_r12ly;
+	}
+
+	public double getPotential() {
+		return potential;
+	}
+
+	public void setPotential(double potential) {
+		this.potential = potential;
+	}
+
+	public double getFreightcost_cm() {
+		return freightcost_cm;
+	}
+
+	public void setFreightcost_cm(double freightcost_cm) {
+		this.freightcost_cm = freightcost_cm;
+	}
+
+	public double getNum_of_cn_cm() {
+		return num_of_cn_cm;
+	}
+
+	public void setNum_of_cn_cm(double num_of_cn_cm) {
+		this.num_of_cn_cm = num_of_cn_cm;
+	}
+
+	public double getNum_of_cn_r12cy() {
+		return num_of_cn_r12cy;
+	}
+
+	public void setNum_of_cn_r12cy(double num_of_cn_r12cy) {
+		this.num_of_cn_r12cy = num_of_cn_r12cy;
+	}
+
+	public double getNum_of_cn_r12ly() {
+		return num_of_cn_r12ly;
+	}
+
+	public void setNum_of_cn_r12ly(double num_of_cn_r12ly) {
+		this.num_of_cn_r12ly = num_of_cn_r12ly;
+	}
+
+	public double getNum_of_ord_cm() {
+		return num_of_ord_cm;
+	}
+
+	public void setNum_of_ord_cm(double num_of_ord_cm) {
+		this.num_of_ord_cm = num_of_ord_cm;
+	}
+
+	public double getNum_of_ord_r12cy() {
+		return num_of_ord_r12cy;
+	}
+
+	public void setNum_of_ord_r12cy(double num_of_ord_r12cy) {
+		this.num_of_ord_r12cy = num_of_ord_r12cy;
+	}
+
+	public double getNum_of_ord_r12ly() {
+		return num_of_ord_r12ly;
+	}
+
+	public void setNum_of_ord_r12ly(double num_of_ord_r12ly) {
+		this.num_of_ord_r12ly = num_of_ord_r12ly;
 	}
 }
