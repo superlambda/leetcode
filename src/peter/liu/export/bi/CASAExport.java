@@ -658,8 +658,8 @@ public class CASAExport extends BatchRunner {
 			returnArray[4] = totalNumberCreditNotes;
 			
 			turnoverMap.put(customerSurrogateKey, returnArray);
-			System.out.println(
-					"customerSurrogateKey " + customerSurrogateKey + " " + returnArray[0] + " " + returnArray[1]+ " " + returnArray[2]);
+//			System.out.println(
+//					"customerSurrogateKey " + customerSurrogateKey + " " + returnArray[0] + " " + returnArray[1]+ " " + returnArray[2]);
 			i++;
 		}
 		System.out.println("turnoverMap size " + turnoverMap.size() + " total searched out: " + i);

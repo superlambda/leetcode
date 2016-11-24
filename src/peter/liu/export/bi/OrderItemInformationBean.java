@@ -51,8 +51,8 @@ public class OrderItemInformationBean {
 	private String	ws1SalesOrganisation;
 
 	private String	ws1CustomerNumber;
-
-	private String	ws1ArticleNumber;
+	private String payer;
+	private String shipToCustomer;
 
 	private String	ws1RegisterNumber;
 
@@ -71,6 +71,8 @@ public class OrderItemInformationBean {
 	
 	private int goodsRecipient;
 	private int debtor;
+	private String debtorName;
+	private String goodsRecipientName;
 	private String WarehouseNumber;
 	
 	private String orderReason;
@@ -79,6 +81,22 @@ public class OrderItemInformationBean {
 	private String salesDocumentType;
 	private double  freightCost;
 	private double	taxAmount;
+	
+	public String getPayer() {
+		return payer;
+	}
+
+	public void setPayer(String payer) {
+		this.payer = payer;
+	}
+
+	public String getShipToCustomer() {
+		return shipToCustomer;
+	}
+
+	public void setShipToCustomer(String shipToCustomer) {
+		this.shipToCustomer = shipToCustomer;
+	}
 	
 	public int getGoodsRecipient() {
 		return goodsRecipient;
@@ -288,13 +306,6 @@ public class OrderItemInformationBean {
 		this.ws1CustomerNumber = ws1CustomerNumber;
 	}
 
-	public String getWs1ArticleNumber() {
-		return ws1ArticleNumber;
-	}
-
-	public void setWs1ArticleNumber(String ws1ArticleNumber) {
-		this.ws1ArticleNumber = ws1ArticleNumber;
-	}
 
 	public String getWs1RegisterNumber() {
 		return ws1RegisterNumber;
@@ -390,6 +401,22 @@ public class OrderItemInformationBean {
 
 	public void setTaxAmount(double taxAmount) {
 		this.taxAmount = taxAmount;
+	}
+
+	public String getDebtorName() {
+		return debtorName;
+	}
+
+	public void setDebtorName(String debtorName) {
+		this.debtorName = debtorName;
+	}
+
+	public String getGoodsRecipientName() {
+		return goodsRecipientName;
+	}
+
+	public void setGoodsRecipientName(String goodsRecipientName) {
+		this.goodsRecipientName = goodsRecipientName;
 	}
 	
 }

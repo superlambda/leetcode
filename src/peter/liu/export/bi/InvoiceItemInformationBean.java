@@ -57,6 +57,8 @@ public class InvoiceItemInformationBean {
 	private int		customerNumber;
 
 	private String	articleNumber;
+	
+	private String	productNumber;
 
 	private int		registerNumber;
 
@@ -86,8 +88,13 @@ public class InvoiceItemInformationBean {
 	 * asked by HR/SD/Customer Master
 	 */
 	private String ws1CustomerNumber;
+	
+	private String payer;
+	private String shipToCustomer;
+	
+	private String debtorName;
+	private String goodsRecipientName;
 
-	private String ws1ArticleNumber;
 	/*
 	 * CTERREP Sales Rep WS1 NUMC 8 Logic defined by Key Users in HR via Sales
 	 * Rep Mapping; New_20131210: Field Value is 9997 or 9998, if there is an
@@ -430,13 +437,6 @@ public class InvoiceItemInformationBean {
 		this.ws1CustomerNumber = ws1CustomerNumber;
 	}
 
-	public String getWs1ArticleNumber() {
-		return ws1ArticleNumber;
-	}
-
-	public void setWs1ArticleNumber(String ws1ArticleNumber) {
-		this.ws1ArticleNumber = ws1ArticleNumber;
-	}
 
 	public String getWs1RegisterNumber() {
 		return ws1RegisterNumber;
@@ -542,7 +542,43 @@ public class InvoiceItemInformationBean {
 		this.documentCategory = documentCategory;
 	}
 
-	
-	
-	
+	public String getProductNumber() {
+		return productNumber;
+	}
+
+	public void setProductNumber(String productNumber) {
+		this.productNumber = productNumber;
+	}
+
+	public String getPayer() {
+		return payer;
+	}
+
+	public void setPayer(String payer) {
+		this.payer = payer;
+	}
+
+	public String getShipToCustomer() {
+		return shipToCustomer;
+	}
+
+	public void setShipToCustomer(String shipToCustomer) {
+		this.shipToCustomer = shipToCustomer;
+	}
+
+	public String getDebtorName() {
+		return debtorName;
+	}
+
+	public void setDebtorName(String debtorName) {
+		this.debtorName = debtorName;
+	}
+
+	public String getGoodsRecipientName() {
+		return goodsRecipientName;
+	}
+
+	public void setGoodsRecipientName(String goodsRecipientName) {
+		this.goodsRecipientName = goodsRecipientName;
+	}
 }

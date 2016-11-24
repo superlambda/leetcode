@@ -382,11 +382,11 @@ public class BIDateMapping {
 				}
 
 				productMappingLoaded++;
-				System.out.println("\n(!) " + sheet.getSheetName()
-						+ " products loaded: " + productMappingLoaded);
 				startRow++;
 				row = sheet.getRow(startRow);
 			}
+			System.out.println("\n(!) " + sheet.getSheetName()
+			+ " products loaded: " + productMappingLoaded);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -532,11 +532,11 @@ public class BIDateMapping {
 			ws1CustomerNumber = "902000";
 		} else if (accountNumber == 700019) {
 			ws1CustomerNumber = "903000";
-		}else if (name1.contains("Staff")){
+		}else if (name1!=null&&name1.contains("Staff")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
-		}else if (name1.contains("Wurth")){
+		}else if (name1!=null&&name1.contains("Wurth")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
-		}else if (name1.contains("EDL")){
+		}else if (name1!=null&&name1.contains("EDL")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
 		}else{
 			ws1CustomerNumber=""+accountNumber;
@@ -548,9 +548,19 @@ public class BIDateMapping {
 	public static void fillWS1Information(InvoiceItemInformationBean iiib) {
 		iiib.setWs1SalesOrganisation("3120");
 		iiib.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(iiib.getCustomerNumber(),iiib.getName1()));
+		iiib.setPayer(BIDateMapping.getWS1CustomerNumber(iiib.getDebtor(),iiib.getDebtorName()));
+		iiib.setShipToCustomer(BIDateMapping.getWS1CustomerNumber(iiib.getGoodsRecipient(),iiib.getGoodsRecipientName()));
 		iiib.setWs1RegisterNumber("0000"+iiib.getRegisterNumber());
 		iiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 		iiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
+		String eeeeProductNumber = BIDateMapping.productMap.get(iiib.getProductNumber());
+		if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
+			iiib.setArticleNumber(eeeeProductNumber);
+		} else {
+			iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+			System.out.println("Error: ArticalNumber not found for Invoice: " + iiib.getInvoiceNumber() + " Line: "
+					+ iiib.getInvoiceItem());
+		}
 	}
 	
 	public static void writeInvoiceItemHeaderToCSV(PrintWriter out1) {
@@ -639,7 +649,7 @@ public class BIDateMapping {
 				// Customer Number (Sold-to-Party) WS1
 				sb.append(iiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
 				// TODO Customer Number (Bill-to-Party) WS1
-				sb.append(iiib.getCustomerNumber()).append(BIDateMapping.csvSeperator);
+				sb.append(iiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
 				// TODO Customer Number (Ship-to-Party) WS1
 				sb.append(iiib.getGoodsRecipient()).append(BIDateMapping.csvSeperator);
 				// TODO Customer Number (Payer) WS1

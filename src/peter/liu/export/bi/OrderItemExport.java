@@ -173,6 +173,9 @@ public class OrderItemExport extends BatchRunner {
 				oiib.setName1(orderLine.getDWCustomerOrder().getDWCustomer().getName1());
 				oiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 				oiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+				oiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
+				oiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
+				
 				oiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
 				oiib.setOrderValue(orderLine.getCcLineAmountCustomerOrderLine().getAmount());
 				oiib.setNetValue(orderLine.getCcNetAmountCustomerOrderLine().getAmount());
@@ -240,6 +243,8 @@ public class OrderItemExport extends BatchRunner {
 	private void fillWS1Information(OrderItemInformationBean oiib) {
 		oiib.setWs1SalesOrganisation("3120");
 		oiib.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(oiib.getCustomerNumber(), oiib.getName1()));
+		oiib.setPayer(BIDateMapping.getWS1CustomerNumber(oiib.getDebtor(),oiib.getDebtorName()));
+		oiib.setShipToCustomer(BIDateMapping.getWS1CustomerNumber(oiib.getGoodsRecipient(),oiib.getGoodsRecipientName()));
 		oiib.setWs1RegisterNumber("0000" + oiib.getRegisterNumber());
 		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
@@ -291,12 +296,12 @@ public class OrderItemExport extends BatchRunner {
 			sb.append(oiib.getPlant()).append(BIDateMapping.csvSeperator);
 			sb.append(oiib.getDeliveryPlant()).append(BIDateMapping.csvSeperator);
 			sb.append(oiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
-			// TODO CCBILLTO Customer Number (Bill-to-Party) WS1
-			sb.append(oiib.getCustomerNumber()).append(BIDateMapping.csvSeperator);
-			// TODO Customer Number (Ship-to-Party) WS1
-			sb.append(oiib.getGoodsRecipient()).append(BIDateMapping.csvSeperator);
-			// TODO Customer Number (Payer) WS1
-			sb.append(oiib.getDebtor()).append(BIDateMapping.csvSeperator);
+			// CCBILLTO Customer Number (Bill-to-Party) WS1
+			sb.append(oiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
+			// Customer Number (Ship-to-Party) WS1
+			sb.append(oiib.getShipToCustomer()).append(BIDateMapping.csvSeperator);
+			// Customer Number (Payer) WS1
+			sb.append(oiib.getPayer()).append(BIDateMapping.csvSeperator);
 			if (oiib.getOrderDate() != null) {
 				sb.append(BIDateMapping.dateFormat.format(oiib.getOrderDate())).append(BIDateMapping.csvSeperator);
 			} else {

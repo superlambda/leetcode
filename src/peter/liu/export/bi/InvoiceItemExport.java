@@ -24,6 +24,7 @@ import com.wuerth.phoenix.Phxbasic.models.OwnCompany;
 import com.wuerth.phoenix.Phxbasic.models.Product;
 import com.wuerth.phoenix.Phxbasic.models.SalesArea;
 import com.wuerth.phoenix.Phxbasic.models.Salesman;
+import com.wuerth.phoenix.basic.etnax.datawarehouse.DWConstants;
 import com.wuerth.phoenix.basic.etnax.utilities.batch.BatchRunner;
 import com.wuerth.phoenix.bcutil.PEnumeration;
 import com.wuerth.phoenix.bcutil.PUserException;
@@ -84,10 +85,10 @@ public class InvoiceItemExport extends BatchRunner {
 			out1.close();
 		} else {
 			searchInvoiceItem(year, targetTxt2015);
-			searchCreditNoteItem(2015, targetTxt2015);
+			searchCreditNoteItem(year, targetTxt2015);
 			out1.close();
 		}
-		
+
 		System.out.println("\n[OK]");
 	}
 
@@ -186,28 +187,23 @@ public class InvoiceItemExport extends BatchRunner {
 				iiib.setPrice(invoiceLine.getPrice().getAmount() / invoiceLine.getPrice().getUnit());
 
 				iiib.setInvoiceQuantity(invoiceLine.getQuantity().getAmount());
-				iiib.setGrossValue(
-						invoiceLine.getCcNetAmount().getAmount() + invoiceLine.getCcRebateAmount().getAmount());
+				iiib.setGrossValue(invoiceLine.getCcNetAmount().getAmount());
 
 				iiib.setNetValue(invoiceLine.getCcNetAmount().getAmount());
 				iiib.setTurnover(invoiceLine.getCcNetAmount().getAmount());
 				if (invoiceLine.getCcRebateAmount().getAmount() != 0) {
 					System.out.println("Rebate information Invoice: " + iiib.getInvoiceNumber() + " Line: "
 							+ iiib.getInvoiceItem());
-					iiib.setTurnover(iiib.getTurnover()-invoiceLine.getCcRebateAmount().getAmount());
+					iiib.setTurnover(iiib.getTurnover() - invoiceLine.getCcRebateAmount().getAmount());
 				}
-				
+				iiib.setCogsglep(invoiceLine.getCcCostAmount().getAmount());
+				iiib.setCogspfep(iiib.getCogsglep() / 1.1);
+
 				iiib.setDiscount(invoiceLine.getCcDiscountAmount().getAmount());
 				iiib.setTaxAmount(invoiceLine.getTaxAmount().getAmount());
 				iiib.setCustomerNumber(invoiceLine.getDWCustomer().getAccountNumber());
 				iiib.setName1(invoiceLine.getDWCustomer().getName1());
-				String productNumber = invoiceLine.getDWProduct().getProductNumber();
-				String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
-				if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
-					iiib.setArticleNumber(eeeeProductNumber);
-				} else {
-					iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
-				}
+				iiib.setProductNumber(invoiceLine.getDWProduct().getProductNumber());
 				iiib.setRegisterNumber(invoiceLine.getDWSalesman().getRegisterNumber());
 				Product product = _controller.lookupProduct(invoiceLine.getDWProduct().getProductNumber());
 				iiib.setPriceUnit(invoiceLine.getPrice().getUnit());
@@ -225,6 +221,8 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+					iiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
+					iiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
 					iiib.setOrderItem(col.getLineNumber());
 					iiib.setOrderNumber(col.getParentCustomerOrder().getOrderNumber());
 					iiib.setOrderDate(col.getParentCustomerOrder().getOrderDate());
@@ -235,26 +233,31 @@ public class InvoiceItemExport extends BatchRunner {
 					weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
 							.multiply(cil.getDeliveryLine().getDeliveredQuantity().getAmount()));
 					iiib.setWeight(weight.getAmount());
-					double glep = cil.getDeliveryLine().getCostPrice().getAmount();
-					iiib.setGlep(glep);
-					iiib.setPfep(glep / 1.1);
-					iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
-					iiib.setCogspfep(iiib.getPfep() * iiib.getInvoiceQuantity());
+					// double glep =
+					// cil.getDeliveryLine().getCostPrice().getAmount();
+					// iiib.setGlep(glep);
+					// iiib.setPfep(glep / 1.1);
+					// iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
+					// iiib.setCogspfep(iiib.getPfep() *
+					// iiib.getInvoiceQuantity());
 				} else {
 					CustomerOrderLine col = cil.getCustomerOrderLineDebitOrder();
 					iiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+					iiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
+					iiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
 					iiib.setOrderItem(col.getLineNumber());
 					iiib.setOrderNumber(col.getParentCustomerOrder().getOrderNumber());
 					iiib.setOrderDate(col.getParentCustomerOrder().getOrderDate());
 					iiib.setOrderQuantity(col.getOrderquantity().getAmount());
 
-					double glep = col.getCostPrice().getAmount();
-					iiib.setGlep(glep);
-					iiib.setPfep(glep / 1.1);
-					iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
-					iiib.setCogspfep(iiib.getPfep() * iiib.getInvoiceQuantity());
+					// double glep = col.getCostPrice().getAmount();
+					// iiib.setGlep(glep);
+					// iiib.setPfep(glep / 1.1);
+					// iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
+					// iiib.setCogspfep(iiib.getPfep() *
+					// iiib.getInvoiceQuantity());
 				}
 				if (iiib.getPriceUnit() == 10000) {
 					iiib.setPriceUnit(1000);
@@ -266,15 +269,15 @@ public class InvoiceItemExport extends BatchRunner {
 				invoiceItemInfoList.addLast(iiib);
 			}
 			System.out.println("\n Number of invoice items loaded: " + invoiceItemInfoList.size());
-			BIDateMapping.writeInvoiceItemInfoToTxt(invoiceItemInfoList, out1,numberOfInvoiceItems);
+			BIDateMapping.writeInvoiceItemInfoToTxt(invoiceItemInfoList, out1, numberOfInvoiceItems);
 			_context.commit();
 		}
 		penum.destroy();
-//		out1.close();
+		// out1.close();
 		System.out.println("\n(*) Write txt file  end.");
 
 	}
-	
+
 	private void searchCreditNoteItem(int year, String targetTxt)
 			throws TimestampException, PUserException, IOException {
 		QueryHelper qh = Query.newQueryHelper();
@@ -324,32 +327,22 @@ public class InvoiceItemExport extends BatchRunner {
 				iiib.setCustomerNumber(creditNoteLine.getDWCustomer().getAccountNumber());
 				iiib.setName1(creditNoteLine.getDWCustomer().getName1());
 				iiib.setGrossValue(creditNoteLine.getCcBrutCreditAmount().getAmount()
-						+ creditNoteLine.getCcDiscountCreditAmount().getAmount()
-						+ creditNoteLine.getCcRebateAmount().getAmount());
+						+ creditNoteLine.getCcDiscountCreditAmount().getAmount());
 				iiib.setNetValue(creditNoteLine.getCcBrutCreditAmount().getAmount()
 						+ creditNoteLine.getCcDiscountCreditAmount().getAmount());
 				iiib.setTurnover(iiib.getNetValue());
-				
-				
+
 				if (creditNoteLine.getCcRebateAmount().getAmount() != 0) {
 					System.out.println("Rebate information Credite: " + iiib.getInvoiceNumber() + " Line: "
 							+ iiib.getInvoiceItem());
-					iiib.setTurnover(iiib.getTurnover()-creditNoteLine.getCcRebateAmount().getAmount());
+					iiib.setTurnover(iiib.getTurnover() - creditNoteLine.getCcRebateAmount().getAmount());
 				}
 				if (creditNoteLine.getFromComplaitLineType().equals(ComplaintLineType.RETOURELINE)) {
 					DWRetoureLine retoureLine = (DWRetoureLine) creditNoteLine;
 					iiib.setDocumentType("ZRE");
 					iiib.setPrice(retoureLine.getCcPrice().getAmount() / retoureLine.getCcPrice().getUnit());
 					iiib.setInvoiceQuantity(retoureLine.getQuantityReturned().getAmount());
-					
-					String productNumber = retoureLine.getDWProduct().getProductNumber();
-					String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
-					if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
-						iiib.setArticleNumber(eeeeProductNumber);
-					} else {
-						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
-					}
-
+					iiib.setProductNumber(retoureLine.getDWProduct().getProductNumber());
 					iiib.setRegisterNumber(retoureLine.getDWSalesman().getRegisterNumber());
 					Product product = _controller.lookupProduct(retoureLine.getDWProduct().getProductNumber());
 					iiib.setPriceUnit(retoureLine.getCcPrice().getUnit());
@@ -364,6 +357,8 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setOrderQuantity(col.getOrderquantity().getAmount());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+					iiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
+					iiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
 					OwnCompany oc = _controller.getSingletonOwnCompany();
 					Weight weight = WeightController.getNewWeight(0,
 							oc.getDefaultWeightPerUnit().getWeightMeasureUnit());
@@ -372,12 +367,14 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setWeight(weight.getAmount());
 					iiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
 
-					double glep = deliveryLine.getCostPrice().getAmount();
-					iiib.setGlep(glep);
-					iiib.setPfep(glep /1.1);
-			
-					iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
-					iiib.setCogspfep(iiib.getPfep() * iiib.getInvoiceQuantity());
+					// double glep = deliveryLine.getCostPrice().getAmount();
+					// iiib.setGlep(glep);
+					// iiib.setPfep(glep /1.1);
+					// iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
+					// iiib.setCogspfep(iiib.getPfep() *
+					// iiib.getInvoiceQuantity());
+					iiib.setCogsglep(retoureLine.getCcCostAmount().getAmount());
+					iiib.setCogspfep(iiib.getCogsglep() / 1.1);
 				} else if (creditNoteLine.getFromComplaitLineType().equals(ComplaintLineType.PRICEREDUCTIONLINE)) {
 					DWPriceLine priceLine = (DWPriceLine) creditNoteLine;
 					iiib.setDocumentType("ZG2");
@@ -385,14 +382,7 @@ public class InvoiceItemExport extends BatchRunner {
 							- priceLine.getNewPrice().getAmount() / priceLine.getNewPrice().getUnit())
 							* priceLine.getNewPrice().getUnit());
 					iiib.setInvoiceQuantity(priceLine.getNewQuantity().getAmount());
-					String productNumber = priceLine.getDWProduct().getProductNumber();
-					String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
-					if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
-						iiib.setArticleNumber(eeeeProductNumber);
-					} else {
-						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
-					}
-
+					iiib.setProductNumber(priceLine.getDWProduct().getProductNumber());
 					iiib.setRegisterNumber(priceLine.getDWSalesman().getRegisterNumber());
 					Product product = _controller.lookupProduct(priceLine.getDWProduct().getProductNumber());
 					iiib.setPriceUnit(priceLine.getNewPrice().getUnit());
@@ -413,8 +403,10 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setOrderQuantity(col.getOrderquantity().getAmount());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
+					iiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
+					iiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
 					iiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
-					
+
 					if (cil.getParentCustomerInvoice().getDocumentType().equals(DocType.NORMALINVOICE)) {
 						OwnCompany oc = _controller.getSingletonOwnCompany();
 						Weight weight = WeightController.getNewWeight(0,
@@ -422,34 +414,52 @@ public class InvoiceItemExport extends BatchRunner {
 						weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
 								.multiply(cil.getDeliveryLine().getDeliveredQuantity().getAmount()));
 						iiib.setWeight(weight.getAmount());
-						
-						double glep = cil.getDeliveryLine().getCostPrice().getAmount();
-						iiib.setGlep(glep);
-						iiib.setPfep(glep /1.1);
-						iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
-						iiib.setCogspfep(iiib.getPfep() * iiib.getInvoiceQuantity());
+						// Compared with CASA,Seems only return line needs to
+						// count glep and pfep
+						// double glep =
+						// cil.getDeliveryLine().getCostPrice().getAmount();
+						// iiib.setGlep(glep);
+						// iiib.setPfep(glep /1.1);
+						// iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
+						// iiib.setCogspfep(iiib.getPfep() *
+						// iiib.getInvoiceQuantity());
 					} else {
-						double glep = col.getCostPrice().getAmount();
-						iiib.setGlep(glep);
-						iiib.setPfep(glep /1.1);
-						iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
-						iiib.setCogspfep(iiib.getPfep() * iiib.getInvoiceQuantity());
+						// double glep = col.getCostPrice().getAmount();
+						// iiib.setGlep(glep);
+						// iiib.setPfep(glep /1.1);
+						// iiib.setCogsglep(glep * iiib.getInvoiceQuantity());
+						// iiib.setCogspfep(iiib.getPfep() *
+						// iiib.getInvoiceQuantity());
 					}
 				} else {
 					// DWManualLine manualLine = (DWManualLine) creditNoteLine;
-					if(creditNoteLine.getFromComplaitLineType().equals(ComplaintLineType.FREIGHTLINE)){
-						DWFreightCostLine dwfcl = (DWFreightCostLine)creditNoteLine;
-						iiib.setFreightCost(dwfcl.getNewFreightCosts().getAmount()-dwfcl.getOldFreightCosts().getAmount());
+					if (creditNoteLine.getFromComplaitLineType().equals(ComplaintLineType.FREIGHTLINE)) {
+						DWFreightCostLine dwfcl = (DWFreightCostLine) creditNoteLine;
+						iiib.setFreightCost(
+								dwfcl.getNewFreightCosts().getAmount() - dwfcl.getOldFreightCosts().getAmount());
 					}
 					iiib.setDocumentType("ZG2");
 					iiib.setPrice(creditNoteLine.getCcBrutCreditAmount().getAmount()
 							+ creditNoteLine.getCcDiscountCreditAmount().getAmount());
 					iiib.setInvoiceQuantity(1);
-					iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+					// How to get material number for manual credit note line
+					// Not sure I understand this one if it should have a
+					// product number unless it’s a freight only credit then if
+					// we don’t need this info it won’t need to be exported
+					if (creditNoteLine.getProductSurrogateKey() != DWConstants.NO_SURROGATEKEY_SPECIFIED) {
+						String productNumber = _controller.lookupDWProduct(creditNoteLine.getProductSurrogateKey())
+								.getProductNumber();
+						iiib.setProductNumber(productNumber);
+					} else {
+						System.out.println("Warning: ProductNumber not found for CreditNote: " + iiib.getInvoiceNumber()
+								+ " Line: " + iiib.getInvoiceItem());
+					}
+
+					CustomerAccount customer = _controller.lookupCustomerAccount(iiib.getCustomerNumber());
 					if (creditNoteLine.getDWSalesman() != null) {
 						iiib.setRegisterNumber(creditNoteLine.getDWSalesman().getRegisterNumber());
 					} else {
-						CustomerAccount customer = _controller.lookupCustomerAccount(iiib.getCustomerNumber());
+
 						if (customer != null) {
 							SalesArea sa = customer.getSalesArea(iiib.getInvoiceDate());
 							if (sa != null) {
@@ -460,21 +470,41 @@ public class InvoiceItemExport extends BatchRunner {
 							}
 						}
 					}
+					
+					if (creditNoteLine.getDWDebitor() != null) {
+						iiib.setDebtor(creditNoteLine.getDWDebitor().getAccountNumber());
+						iiib.setDebtorName(creditNoteLine.getDWDebitor().getName1());
+					} else if (customer != null && customer.getDefaultDebitor() != null) {
+						iiib.setDebtor(customer.getDefaultDebitor().getId());
+						iiib.setDebtorName(customer.getDefaultDebitor().getName());
+					} else {
+						System.out.println("Error: Debitor not found for CreditNote: " + iiib.getInvoiceNumber()
+								+ " Line: " + iiib.getInvoiceItem());
+					}
 
+					if (customer != null && customer.getGoodsRecipientdefault() != null) {
+						iiib.setGoodsRecipient(customer.getGoodsRecipientdefault().getId());
+						iiib.setGoodsRecipientName(customer.getGoodsRecipientdefault().getName());
+					} else {
+						System.out.println("Error: GoodsRecipient not found for CreditNote: " + iiib.getInvoiceNumber()
+								+ " Line: " + iiib.getInvoiceItem());
+					}
 					iiib.setPriceUnit(1);
 					iiib.setWeight(0);
 
 					iiib.setOrderItem(1);
-					//TODO
-					iiib.setOrderNumber(999990000);
+					// How to get orderNumber for manual credit note line.
+					// Just use the credit note Number
+					iiib.setOrderNumber(creditNoteLine.getCreditNoteNumber());
 					iiib.setOrderDate(creditNoteLine.getDate());
 					iiib.setOrderQuantity(1);
 					iiib.setGlep(0);
 					iiib.setPfep(0);
 					iiib.setCogsglep(0);
 					iiib.setCogspfep(0);
-					// TODO How to get warehouseNumber for manual credit note
+					// 1: How to get warehouseNumber for manual credit note
 					// line.
+					// If you are not sure just use Cn00 it not that important
 					iiib.setWarehouseNumber("1");
 				}
 				BIDateMapping.fillWS1Information(iiib);
@@ -482,22 +512,22 @@ public class InvoiceItemExport extends BatchRunner {
 				invoiceItemInfoList.addLast(iiib);
 			}
 			System.out.println("\n Number of credit note items loaded: " + invoiceItemInfoList.size());
-			BIDateMapping.writeInvoiceItemInfoToTxt(invoiceItemInfoList, out1,numberOfInvoiceItems);
+			BIDateMapping.writeInvoiceItemInfoToTxt(invoiceItemInfoList, out1, numberOfInvoiceItems);
 			_context.commit();
 		}
 		penum.destroy();
-//		out1.close();
+		// out1.close();
 		System.out.println("\n(*) Write txt file  end.");
 
 	}
-	
+
 	private void fillfillWS1InformationForInvoice(InvoiceItemInformationBean iiib) {
 		iiib.setOrderReason("001");
 		iiib.setOrderCategory("1");
 		iiib.setDocumentCategory("M");
 		iiib.setSalesDocumentType("");
 	}
-	
+
 	private void fillfillWS1InformationForCreditNote(InvoiceItemInformationBean iiib) {
 		iiib.setOrderReason("001");
 		iiib.setOrderCategory("1");
@@ -555,5 +585,5 @@ public class InvoiceItemExport extends BatchRunner {
 			}
 		}
 
-	}	
+	}
 }
