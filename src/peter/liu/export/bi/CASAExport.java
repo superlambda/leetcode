@@ -6,10 +6,12 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.wuerth.phoenix.Phxbasic.enums.CustomerAccountStatus;
 import com.wuerth.phoenix.Phxbasic.models.CompanyPeriod;
@@ -18,6 +20,7 @@ import com.wuerth.phoenix.Phxbasic.models.CustomerAccount;
 import com.wuerth.phoenix.Phxbasic.models.CustomerTurnoverRange;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomer;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomerInvoice;
+import com.wuerth.phoenix.Phxbasic.models.DWCustomerInvoiceLine;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomerStatisticDay;
 import com.wuerth.phoenix.Phxbasic.models.DWDay;
 import com.wuerth.phoenix.Phxbasic.models.DWDebitor;
@@ -38,6 +41,7 @@ import com.wuerth.phoenix.bcutil.TimestampException;
 import com.wuerth.phoenix.bcutil.query.Condition;
 import com.wuerth.phoenix.bcutil.query.Query;
 import com.wuerth.phoenix.bcutil.query.QueryHelper;
+import com.wuerth.phoenix.bcutil.query.QueryParseException;
 import com.wuerth.phoenix.bcutil.query.QueryPredicate;
 import com.wuerth.phoenix.internal.bc.server.query.QueryResultEntry;
 import com.wuerth.phoenix.util.PDate;
@@ -77,7 +81,7 @@ public class CASAExport extends BatchRunner {
 
 	private double turnoverOfActiveCustomer;
 
-	private DecimalFormat df = new DecimalFormat();
+//	private DecimalFormat df = new DecimalFormat();
 
 	private Map<Long, double[]> turnover_glep_cm_map = new HashMap<Long, double[]>();
 	private Map<Long, double[]> turnover_glep_r12cy_map = new HashMap<Long, double[]>();
@@ -93,6 +97,7 @@ public class CASAExport extends BatchRunner {
 	private Map<Long, double[]> turnover_glep_bf_23pe_map = new HashMap<Long, double[]>();
 	private Map<Long, Double> freight_cost_cm_map = new HashMap<Long, Double>();
 	
+	private Set<Long> validCustomerSet = new HashSet<Long>(2000);
 
 	private List<CustomerTurnoverRange> turnoverRangeList = null;
 
@@ -175,8 +180,8 @@ public class CASAExport extends BatchRunner {
 		FileWriter outFile = new FileWriter(targetFile);
 		out1 = new PrintWriter(outFile);
 		writeInvoiceItemHeaderToCSV(out1);
-		df.setMaximumFractionDigits(2);
-		df.setGroupingUsed(false);
+//		df.setMaximumFractionDigits(2);
+//		df.setGroupingUsed(false);
 		initializeDate(periodArray);
 		System.out.println("\n(!) Write txt file  start.\n");
 		searchDWCustomer(periodArray);
@@ -191,6 +196,7 @@ public class CASAExport extends BatchRunner {
 		turnoverOfActiveCustomer = _controller.getSingletonStatisticParameters().getAmountForActiveCustomer()
 				.getAmount();
 		System.out.println("\n(*) turnoverOfActiveCustomer " + turnoverOfActiveCustomer);
+		getCustomerSet();
 		fillCustomerStatisticByPeriod(periodArray);
 		writeCASAInfoToTxt(dummyCustomerCasaList);
 	}
@@ -235,7 +241,7 @@ public class CASAExport extends BatchRunner {
 			PDate twentythreePeriodAgoFromDate = twentythreePeriodAgo.getFrom();
 
 			CompanyPeriod twentyfourPeriodAgo = CalendarUtils.addPeriod(_controller, currentPeriod, -24);
-			PDate twentyfourPeriodAgoFromDate = twentyfourPeriodAgo.getTo();
+			PDate twentyfourPeriodAgoToDate = twentyfourPeriodAgo.getTo();
 
 			CASAPeriodBean casaPeriodBean = new CASAPeriodBean();
 			casaPeriodBean.setYearAndPeriod(yearAndPeriod);
@@ -248,13 +254,13 @@ public class CASAExport extends BatchRunner {
 			casaPeriodBean.setTwelvePeriodAgoToDate(twelvePeriodAgoToDate);
 			casaPeriodBean.setThirteenPeriodAgoToDate(thirteenPeriodAgoToDate);
 			casaPeriodBean.setTwentythreePeriodAgoFromDate(twentythreePeriodAgoFromDate);
-			casaPeriodBean.setTwentyfourPeriodAgoToDate(twentyfourPeriodAgoFromDate);
+			casaPeriodBean.setTwentyfourPeriodAgoToDate(twentyfourPeriodAgoToDate);
 
 			System.out.println("currentPeriodFromDate " + currentPeriodFromDate + " currentPeriodToDate "
 					+ currentPeriodToDate + " onPeriodAgoToDate  " + onPeriodAgoToDate + " elevenPeriodAgoFromDate "
 					+ elevenPeriodAgoFromDate + " twelvePeriodAgoToDate " + twelvePeriodAgoToDate
 					+ " thirteenPeriodAgoToDate " + thirteenPeriodAgoToDate + " twentythreePeriodAgoFromDate "
-					+ twentythreePeriodAgoFromDate +" twentyfourPeriodAgoFromDate " +twentyfourPeriodAgoFromDate);
+					+ twentythreePeriodAgoFromDate +" twentyfourPeriodAgoToDate " +twentyfourPeriodAgoToDate);
 
 			periodMap.put(yearAndPeriod, casaPeriodBean);
 		}
@@ -320,6 +326,10 @@ public class CASAExport extends BatchRunner {
 				List<DWCustomer> list = new ArrayList<DWCustomer>(penum.nextBatch(NUMBER_OF_BATCH_TO_FECTCH));
 				casaList = new LinkedList<CASABean>();
 				for (DWCustomer dwCustomer : list) {
+					if (!validCustomerSet.contains(dwCustomer.getSurrogateKey())) {
+						System.out.println("\n Customer did not purchase since 20120101 : " + dwCustomer.getAccountNumber());
+						continue;
+					}
 					CustomerAccount customer = _controller.lookupCustomerAccount(dwCustomer.getAccountNumber());
 					PDate customerCreationDate = customer.getCreationDate();
 					if (customerCreationDate != null) {
@@ -343,8 +353,17 @@ public class CASAExport extends BatchRunner {
 							Salesman salesman = sa.getResponsibleSalesman(casaPeriodBean.getCurrentPeriodToDate());
 							if (salesman != null) {
 								casa.setRegisterNumber(salesman.getRegisterNumber());
+							}else{
+								System.out.println("\n Customer has no salesman assigned : "
+										+ customer.getAccountNumber() + " in period " + periodArray[i]);
+								continue;
 							}
+						}else{
+							System.out.println("\n Customer has no salesman assigned : "
+									+ customer.getAccountNumber() + " in period " + periodArray[i]);
+							continue;
 						}
+						
 						if (customer.getIsOrsyCustomerActivated() && customer.getOrsyRegisterDate() != null
 								&& customer.getOrsyRegisterDate().before(casaPeriodBean.getCurrentPeriodToDate())) {
 							casa.setOrsy(true);
@@ -406,7 +425,7 @@ public class CASAExport extends BatchRunner {
 					// New Customer Flag Rolling 12 current Year
 					if (casa.getTurnover_r12cy() >= turnoverOfActiveCustomer) {
 						double[] turnover_glep_bf_r12cy = turnover_glep_bf_r12cy_map.get(dwCustomer.getSurrogateKey());
-						// Has turnover before current 12 periods
+						// Has no turnover before current 12 periods
 						if (turnover_glep_bf_r12cy == null || turnover_glep_bf_r12cy[0] < turnoverOfActiveCustomer) {
 							casa.setNewcustomer_r12cy(true);
 						}
@@ -517,7 +536,11 @@ public class CASAExport extends BatchRunner {
 		for (CustomerTurnoverRange tr : turnoverRangeList) {
 			if (tr.getMinAmount().getAmount() <= turnoverAmount
 					&& (tr.getMaxAmount() == null || tr.getMaxAmount().getAmount() >= turnoverAmount)) {
-				return tr.getId();
+				if(tr.getId().equals("Z12")){
+					return "ZE";
+				}else{
+					return tr.getId();
+				}
 			}
 		}
 		return null;
@@ -667,6 +690,22 @@ public class CASAExport extends BatchRunner {
 		cusStatPEnum.destroy();
 		return turnoverMap;
 	}
+	
+	private void getCustomerSet() throws QueryParseException, PUserException {
+		QueryHelper qh = Query.newQueryHelper();
+		qh.addResultAttribute(DWCustomerInvoiceLine.CUSTOMERSURROGATEKEY);
+		QueryPredicate p = qh.attr(DWCustomerInvoiceLine.INVOICEDATE).gte().val(new PDate(2013,0,1)).predicate();
+		qh.setClass(DWCustomerInvoiceLine.class);
+		qh.setDistinct(true);
+		Condition condition = qh.condition(p);
+		PEnumeration enumeration = _controller.createIteratorFactory().getSelect(condition);
+		while (enumeration.hasMoreElements()) {
+		   QueryResultEntry resultEntry = (QueryResultEntry) enumeration.nextElement();
+		   validCustomerSet.add((Long)resultEntry.get(0));
+		}
+		System.out.println("Valid customer total: "+validCustomerSet.size());
+		enumeration.destroy();
+	}
 
 	private void writeCASAInfoToTxt(LinkedList<CASABean> casaList) {
 		for (int i = 0; i < casaList.size(); i++) {
@@ -779,136 +818,78 @@ public class CASAExport extends BatchRunner {
 				sb.append("").append(BIDateMapping.csvSeperator);
 			}
 			// Potential
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getPotential()))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getPotential()))))
+					.append(BIDateMapping.csvSeperator);
 			// Turnover rolling 12 Months last Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12ly())))
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12ly()))))
 					.append(BIDateMapping.csvSeperator);
 			// Turnover current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_cm())))
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getTurnover_cm()))))
 					.append(BIDateMapping.csvSeperator);
 			// Turnover rolling 12 Months current Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12cy())))
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12cy()))))
 					.append(BIDateMapping.csvSeperator);
-			// TODO Freight Costs Current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getFreightcost_cm())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getFreightcost_cm()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods PFEP rolling 12 Months last Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12ly())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12ly()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods PFEP current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_cm())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogspfep_cm()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods PFEP rolling 12 Months current Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12cy())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12cy()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods GLEP rolling 12 Months last Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12ly())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12ly()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods GLEP current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_cm())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogsglep_cm()))))
+					.append(BIDateMapping.csvSeperator);
 			// Cost of Goods GLEP rolling 12 Months current Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12cy())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12cy()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Credit Notes last Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_r12ly())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_r12ly()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Credit Notes current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_cm())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_cm()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Credit Notes current Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_r12cy())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_cn_r12cy()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Orders last Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_r12ly())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_r12ly()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Orders current Month
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_cm())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_cm()))))
+					.append(BIDateMapping.csvSeperator);
 			// Number of Orders current Year
-			sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_r12cy())))
-			.append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(
+					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(casab.getNum_of_ord_r12cy()))))
+					.append(BIDateMapping.csvSeperator);
 			out1.println(sb.toString());
 			numberOfCASAsWritten++;
-			System.out.println("\n Number of casas writed in txt 1: " + numberOfCASAsWritten);
 		}
+		System.out.println("\n Number of casas writed in txt 1: " + numberOfCASAsWritten);
 		out1.flush();
 	}
-
-	// private void writeCASAInfoToTxt(LinkedList<CASABean> casaList) {
-	// for (int i = 0; i < casaList.size(); i++) {
-	// CASABean casab = casaList.get(i);
-	// StringBuffer sb = new StringBuffer();
-	// sb.append(casab.getWs1SalesOrganisation()).append(BIDateMapping.csvSeperator);
-	// sb.append(casab.getPeriod()).append(BIDateMapping.csvSeperator);
-	// sb.append(casab.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
-	// sb.append(casab.getWs1RegisterNumber()).append(BIDateMapping.csvSeperator);
-	// sb.append(" ").append(BIDateMapping.csvSeperator);
-	// sb.append(casab.getWs1CustomerStatus()).append(BIDateMapping.csvSeperator);
-	//
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_cm())))
-	// .append(BIDateMapping.csvSeperator);
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12cy())))
-	// .append(BIDateMapping.csvSeperator);
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getTurnover_r12ly())))
-	// .append(BIDateMapping.csvSeperator);
-	//
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12cy())))
-	// .append(BIDateMapping.csvSeperator);
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_r12ly())))
-	// .append(BIDateMapping.csvSeperator);
-	//
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12cy())))
-	// .append(BIDateMapping.csvSeperator);
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_r12ly())))
-	// .append(BIDateMapping.csvSeperator);
-	//
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogspfep_cm())))
-	// .append(BIDateMapping.csvSeperator);
-	// sb.append(df.format(DoubleUtils.getRoundedAmount(casab.getCogsglep_cm())))
-	// .append(BIDateMapping.csvSeperator);
-	//
-	// if (casab.getSml_r12cy() != null) {
-	// sb.append(casab.getSml_r12cy()).append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	// if (casab.getSml_r12ly() != null) {
-	// sb.append(casab.getSml_r12ly()).append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	//
-	// if (casab.isNewcustomer_cm()) {
-	// sb.append("x").append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	// if (casab.isZerocustomer_r12cy()) {
-	// sb.append("x").append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	//
-	// if (casab.isReactivatedcustomer_cm()) {
-	// sb.append("x").append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	//
-	// if (casab.isBuyingcustomer500_r12cy()) {
-	// sb.append("x").append(BIDateMapping.csvSeperator);
-	// } else {
-	// sb.append("").append(BIDateMapping.csvSeperator);
-	// }
-	//
-	// out1.println(sb.toString());
-	// numberOfCASAsWritten++;
-	// System.out.println("\n Number of casas writed in txt 1: " +
-	// numberOfCASAsWritten);
-	// }
-	// out1.flush();
-	// }
 
 	public static void writeInvoiceItemHeaderToCSV(PrintWriter out1) {
 		StringBuffer sb = new StringBuffer();

@@ -11,7 +11,6 @@ import com.wuerth.phoenix.Phxbasic.enums.CustomerOrderStatus;
 import com.wuerth.phoenix.Phxbasic.models.CustomerOrderLine;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomerOrderLine;
 import com.wuerth.phoenix.Phxbasic.models.OwnCompany;
-import com.wuerth.phoenix.Phxbasic.models.PickingReservation;
 import com.wuerth.phoenix.Phxbasic.models.Product;
 import com.wuerth.phoenix.basic.etnax.common.utilsdir.DoubleUtils;
 import com.wuerth.phoenix.basic.etnax.utilities.batch.BatchRunner;
@@ -40,7 +39,7 @@ public class OrderItemExport extends BatchRunner {
 
 	private String targetTxt2015 = "../../var/exportSAP/MappingOrderItems-2015.csv";
 	private String targetTxt2016 = "../../var/exportSAP/MappingOrderItems-2016.csv";
-	private String targetTxt2017 = "../../var/exportSAP/MappingOrderItems-2014.csv";
+	private String targetTxt2017 = "../../var/exportSAP/MappingOrderItems-2017.csv";
 	private boolean isTest = false;
 	private boolean isAll = false;
 	private boolean isFirstRound = false;
@@ -48,11 +47,11 @@ public class OrderItemExport extends BatchRunner {
 	private int year = 2015;
 	private PrintWriter out1 = null;
 	private int numberOfOrderItems = 0;
-	private String ownCompanyName;
+	private OwnCompany oc;
 
 	@Override
 	protected void batchMethod() throws TimestampException, PUserException, IOException {
-		ownCompanyName = _controller.getSingletonOwnCompany().getName();
+		oc = _controller.getSingletonOwnCompany();
 		if (isTest) {
 			searchOrderItem(year, targetTxt2015);
 		} else if (isFirstRound) {
@@ -111,7 +110,7 @@ public class OrderItemExport extends BatchRunner {
 		System.out.println("-args first \n\tfirst : Only output order lines in date 20151201-20151231");
 		System.out.println("-args final \n\tfinal : Only output order lines in date 20170201-20170228");
 		System.out.println(
-				"-args all \n\tall : Output order lines between year 2014 and 2016, each year has a output file");
+				"-args all \n\tall : Output order lines between year 2015 and 2016, each year has a output file");
 		System.out.println("-args 2015, 2016 or 2017 \n\tall : Output order lines in 2015 or 2016 or 2017");
 		System.out.println("output file are in path ../../var/exportSAP/ start with MappingOrderItems-");
 	}
@@ -175,17 +174,17 @@ public class OrderItemExport extends BatchRunner {
 				oiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
 				oiib.setGoodsRecipientName(col.getParentCustomerOrder().getGoodsRecipient().getName());
 				oiib.setDebtorName(col.getParentCustomerOrder().getDebitor().getName());
-				
 				oiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());
-				oiib.setOrderValue(orderLine.getCcLineAmountCustomerOrderLine().getAmount());
+				double orderValue = orderLine.getPrice().getMoney().divide((double) orderLine.getPrice().getUnit())
+						.multiply(orderLine.getOrderQuantity().getAmount()).getAmount();
+				oiib.setOrderValue(orderValue);
+				oiib.setDiscount(orderValue* (orderLine.getDiscount()+orderLine.getPromotionDiscount()) / 100);
 				oiib.setNetValue(orderLine.getCcNetAmountCustomerOrderLine().getAmount());
-				// TODO How to add rebate here
 				oiib.setGrossValue(oiib.getNetValue());
-				oiib.setDiscount(oiib.getOrderValue() * orderLine.getDiscount() / 100);
 				if (orderLine.getLineNumber() == 1) {
 					oiib.setFreightCost(orderLine.getDWCustomerOrder().getCcFreightCost().getAmount());
 				}
-				oiib.setTaxAmount((oiib.getNetValue()+oiib.getFreightCost())*0.15);
+				oiib.setTaxAmount(oiib.getNetValue()*0.15);
 				String productNumber = orderLine.getDWProduct().getProductNumber();
 				String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
 				if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
@@ -195,7 +194,6 @@ public class OrderItemExport extends BatchRunner {
 				}
 
 				oiib.setRegisterNumber(orderLine.getDWCustomerOrder().getDWSalesman().getRegisterNumber());
-				Product product = _controller.lookupProduct(orderLine.getDWProduct().getProductNumber());
 				oiib.setPriceUnit(orderLine.getPrice().getUnit());
 
 				oiib.setOrderItem(orderLine.getLineNumber());
@@ -203,26 +201,24 @@ public class OrderItemExport extends BatchRunner {
 				oiib.setOrderDate(orderLine.getCustomerOrderDate());
 
 				oiib.setOrderQuantity(orderLine.getOrderQuantity().getAmount());
-				OwnCompany oc = _controller.getSingletonOwnCompany();
+				Product product = _controller.lookupProduct(orderLine.getDWProduct().getProductNumber());
 				Weight weight = WeightController.getNewWeight(0, oc.getDefaultWeightPerUnit().getWeightMeasureUnit());
 				weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
 						.multiply(orderLine.getDeliveredQuantity().getAmount()));
 				oiib.setWeight(weight.getAmount());
-				if (col.getWarehouseOrderLineMain() != null
-						&& col.getWarehouseOrderLineMain().getAllPickingReservation() != null
-						&& col.getWarehouseOrderLineMain().getAllPickingReservation().size() > 0) {
-					PickingReservation pr = (PickingReservation) col.getWarehouseOrderLineMain()
-							.getAllPickingReservation().get(0);
-					oiib.setStorageLocation(pr.getFullLocationName());
-				} else {
-					oiib.setStorageLocation(" ");
-				}
+//				if (col.getWarehouseOrderLineMain() != null
+//						&& col.getWarehouseOrderLineMain().getAllPickingReservation() != null
+//						&& col.getWarehouseOrderLineMain().getAllPickingReservation().size() > 0) {
+//					PickingReservation pr = (PickingReservation) col.getWarehouseOrderLineMain()
+//							.getAllPickingReservation().get(0);
+//					oiib.setStorageLocation(pr.getFullLocationName());
+//				} else {
+//					oiib.setStorageLocation(" ");
+//				}
 
 				double glep = orderLine.getCostPrice().getAmount();
 				oiib.setCogsglep(glep * oiib.getOrderQuantity());
 				oiib.setCogspfep(oiib.getCogsglep() / 1.1);
-				// TODO How to calculate discount
-				// oiib.setDiscount(orderLine.getDiscount());
 				if (oiib.getPriceUnit() == 10000) {
 					oiib.setPriceUnit(1000);
 					oiib.setPrice(oiib.getPrice() / 10);
@@ -326,20 +322,20 @@ public class OrderItemExport extends BatchRunner {
 			sb.append(oiib.getOrderCreditNoteSign()).append(BIDateMapping.csvSeperator);
 			// CREACOMP Complaint Reason
 			sb.append(" ").append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getOrderValue())).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getOrderValue())))).append(BIDateMapping.csvSeperator);
 			//LOGTO Gross Value
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getGrossValue())).append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getNetValue())).append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getDiscount())).append(BIDateMapping.csvSeperator);
-			sb.append(0.00).append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getPrice())).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getGrossValue())))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getNetValue())))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getDiscount())))).append(BIDateMapping.csvSeperator);
+			sb.append("0,00").append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getPrice())))).append(BIDateMapping.csvSeperator);
 			// LON_FR Freight Costs
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getFreightCost())).append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getCogspfep())).append(BIDateMapping.csvSeperator);
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getCogsglep())).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getFreightCost())))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getCogspfep())))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getCogsglep())))).append(BIDateMapping.csvSeperator);
 			// LOX_TAX Tax Amount
-			sb.append(DoubleUtils.getRoundedAmount(oiib.getTaxAmount())).append(BIDateMapping.csvSeperator);
-			sb.append(FormatHelper.getWeightFormat().format(oiib.getWeight())).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(oiib.getTaxAmount())))).append(BIDateMapping.csvSeperator);
+			sb.append(BIDateMapping.convertDotToComma(FormatHelper.getWeightFormat().format(oiib.getWeight()))).append(BIDateMapping.csvSeperator);
 			out1.println(sb.toString());
 			numberOfOrderItems++;
 		}

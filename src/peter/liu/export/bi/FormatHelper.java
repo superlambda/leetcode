@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 public class FormatHelper {
    
 	private static DecimalFormat weightFormat =null;
+	private static DecimalFormat priceFormat =null;
 	
 	private FormatHelper(){
 		
@@ -22,6 +23,16 @@ public class FormatHelper {
 			weightFormat.setGroupingUsed(false);
 		}
 		return weightFormat;
+	}
+	
+	public static DecimalFormat getPriceFormat(){
+		if(priceFormat==null){
+			priceFormat=new DecimalFormat();
+			priceFormat.setMaximumFractionDigits(2);
+			priceFormat.setMinimumFractionDigits(2);
+			priceFormat.setGroupingUsed(false);
+		}
+		return priceFormat;
 	}
 			
 }
