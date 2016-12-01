@@ -200,7 +200,7 @@ public class OrderItemExport extends BatchRunner {
 				oiib.setOrderNumber(orderLine.getCustomerOrderNumber());
 				oiib.setOrderDate(orderLine.getCustomerOrderDate());
 
-				oiib.setOrderQuantity(orderLine.getOrderQuantity().getAmount());
+				oiib.setOrderQuantity((int)orderLine.getOrderQuantity().getAmount());
 				Product product = _controller.lookupProduct(orderLine.getDWProduct().getProductNumber());
 				Weight weight = WeightController.getNewWeight(0, oc.getDefaultWeightPerUnit().getWeightMeasureUnit());
 				weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()

@@ -538,12 +538,15 @@ public class BIDateMapping {
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
 		}else if (name1!=null&&name1.contains("EDL")){
 			ws1CustomerNumber = "9"+String.valueOf(accountNumber).substring(1);
+		}else if(accountNumber<10000){//accountNumber is salesman
+			ws1CustomerNumber = "920544";//accountNumber is salesman
 		}else{
 			ws1CustomerNumber=""+accountNumber;
 		}
 		customerMap.put(accountNumber, ws1CustomerNumber);
 		return ws1CustomerNumber;
 	}
+	
 	
 	public static void fillWS1Information(InvoiceItemInformationBean iiib) {
 		iiib.setWs1SalesOrganisation("3120");
@@ -650,10 +653,10 @@ public class BIDateMapping {
 			sb.append(iiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
 			// TODO Customer Number (Bill-to-Party) WS1
 			sb.append(iiib.getWs1CustomerNumber()).append(BIDateMapping.csvSeperator);
-			// TODO Customer Number (Ship-to-Party) WS1
-			sb.append(iiib.getGoodsRecipient()).append(BIDateMapping.csvSeperator);
-			// TODO Customer Number (Payer) WS1
-			sb.append(iiib.getDebtor()).append(BIDateMapping.csvSeperator);
+			// Customer Number (Ship-to-Party) WS1
+			sb.append(iiib.getShipToCustomer()).append(BIDateMapping.csvSeperator);
+			// Customer Number (Payer) WS1
+			sb.append(iiib.getPayer()).append(BIDateMapping.csvSeperator);
 			// Order Document Entry Date
 			if (iiib.getOrderDate() != null) {
 				sb.append(BIDateMapping.dateFormat.format(iiib.getOrderDate())).append(BIDateMapping.csvSeperator);

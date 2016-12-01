@@ -187,7 +187,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					DWRetoureLine retoureLine = (DWRetoureLine) creditNoteLine;
 					iiib.setDocumentType("ZRE");
 					iiib.setPrice(retoureLine.getCcPrice().getAmount() / retoureLine.getCcPrice().getUnit());
-					iiib.setInvoiceQuantity(retoureLine.getQuantityReturned().getAmount());
+					iiib.setInvoiceQuantity((int)retoureLine.getQuantityReturned().getAmount());
 					
 					String productNumber = retoureLine.getDWProduct().getProductNumber();
 					String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
@@ -208,7 +208,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					iiib.setOrderItem(col.getLineNumber());
 					iiib.setOrderNumber(col.getParentCustomerOrder().getOrderNumber());
 					iiib.setOrderDate(col.getParentCustomerOrder().getOrderDate());
-					iiib.setOrderQuantity(col.getOrderquantity().getAmount());
+					iiib.setOrderQuantity((int)col.getOrderquantity().getAmount());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
 					OwnCompany oc = _controller.getSingletonOwnCompany();
@@ -231,7 +231,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					iiib.setPrice((priceLine.getOldPrice().getAmount() / priceLine.getOldPrice().getUnit()
 							- priceLine.getNewPrice().getAmount() / priceLine.getNewPrice().getUnit())
 							* priceLine.getNewPrice().getUnit());
-					iiib.setInvoiceQuantity(priceLine.getNewQuantity().getAmount());
+					iiib.setInvoiceQuantity((int)priceLine.getNewQuantity().getAmount());
 					String productNumber = priceLine.getDWProduct().getProductNumber();
 					String eeeeProductNumber = BIDateMapping.productMap.get(productNumber);
 					if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
@@ -257,7 +257,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					iiib.setOrderItem(col.getLineNumber());
 					iiib.setOrderNumber(col.getParentCustomerOrder().getOrderNumber());
 					iiib.setOrderDate(col.getParentCustomerOrder().getOrderDate());
-					iiib.setOrderQuantity(col.getOrderquantity().getAmount());
+					iiib.setOrderQuantity((int)col.getOrderquantity().getAmount());
 					iiib.setGoodsRecipient(col.getParentCustomerOrder().getGoodsRecipient().getId());
 					iiib.setDebtor(col.getParentCustomerOrder().getDebitor().getId());
 					iiib.setWarehouseNumber(col.getParentCustomerOrder().getWarehouseNumber());

@@ -18,7 +18,7 @@ public class OrderItemInformationBean {
 
 	private PDate	orderDate;
 
-	private double	orderQuantity;
+	private int	orderQuantity;
 
 	private double	price;
 
@@ -178,11 +178,11 @@ public class OrderItemInformationBean {
 		this.orderDate = orderDate;
 	}
 
-	public double getOrderQuantity() {
+	public int getOrderQuantity() {
 		return orderQuantity;
 	}
 
-	public void setOrderQuantity(double orderQuantity) {
+	public void setOrderQuantity(int orderQuantity) {
 		this.orderQuantity = orderQuantity;
 	}
 

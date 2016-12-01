@@ -26,7 +26,7 @@ public class InvoiceItemInformationBean {
 
 	private PDate	invoiceDate;
 
-	private double	orderQuantity;
+	private int	orderQuantity;
 
 	private double	price;
 
@@ -34,7 +34,7 @@ public class InvoiceItemInformationBean {
 
 	private String	weightUnit;
 
-	private double	invoiceQuantity;
+	private int	invoiceQuantity;
 
 	private double	grossValue;
 
@@ -237,11 +237,11 @@ public class InvoiceItemInformationBean {
 		this.invoiceDate = invoiceDate;
 	}
 
-	public double getOrderQuantity() {
+	public int getOrderQuantity() {
 		return orderQuantity;
 	}
 
-	public void setOrderQuantity(double orderQuantity) {
+	public void setOrderQuantity(int orderQuantity) {
 		this.orderQuantity = orderQuantity;
 	}
 
@@ -261,11 +261,11 @@ public class InvoiceItemInformationBean {
 		this.weight = weight;
 	}
 
-	public double getInvoiceQuantity() {
+	public int getInvoiceQuantity() {
 		return invoiceQuantity;
 	}
 
-	public void setInvoiceQuantity(double invoiceQuantity) {
+	public void setInvoiceQuantity(int invoiceQuantity) {
 		this.invoiceQuantity = invoiceQuantity;
 	}
 
