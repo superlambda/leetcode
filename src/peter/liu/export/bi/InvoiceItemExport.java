@@ -51,7 +51,6 @@ public class InvoiceItemExport extends BatchRunner {
 	private String targetTxt2017 = "../../var/exportSAP/MappingInvoiceItems-2017.csv";
 	private PrintWriter out1 = null;
 	private int numberOfInvoiceItems = 0;
-	private String ownCompanyName;
 	private boolean isTest = false;
 	private boolean isAll = false;
 	private boolean isFirstRound = false;
@@ -60,8 +59,7 @@ public class InvoiceItemExport extends BatchRunner {
 
 	@Override
 	protected void batchMethod() throws TimestampException, PUserException, IOException {
-		ownCompanyName = _controller.getSingletonOwnCompany().getName();
-
+		BIDateMapping.readProductMappingFromExcelForBI();
 		if (isTest) {
 			searchInvoiceItem(year, targetTxt2015);
 			searchCreditNoteItem(year, targetTxt2015);

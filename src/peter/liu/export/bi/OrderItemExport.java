@@ -52,6 +52,7 @@ public class OrderItemExport extends BatchRunner {
 	@Override
 	protected void batchMethod() throws TimestampException, PUserException, IOException {
 		oc = _controller.getSingletonOwnCompany();
+		BIDateMapping.readProductMappingFromExcelForBI();
 		if (isTest) {
 			searchOrderItem(year, targetTxt2015);
 		} else if (isFirstRound) {
@@ -240,7 +241,11 @@ public class OrderItemExport extends BatchRunner {
 		oiib.setWs1SalesOrganisation("3120");
 		oiib.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(oiib.getCustomerNumber(), oiib.getName1()));
 		oiib.setPayer(BIDateMapping.getWS1CustomerNumber(oiib.getDebtor(),oiib.getDebtorName()));
-		oiib.setShipToCustomer(BIDateMapping.getWS1CustomerNumber(oiib.getGoodsRecipient(),oiib.getGoodsRecipientName()));
+		String shipToCustomer=BIDateMapping.getWS1CustomerNumber(oiib.getGoodsRecipient(),oiib.getGoodsRecipientName());
+		if(shipToCustomer.length()<6){
+			shipToCustomer=oiib.getWs1CustomerNumber();
+		}
+		oiib.setShipToCustomer(shipToCustomer);
 		oiib.setWs1RegisterNumber("0000" + oiib.getRegisterNumber());
 		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(oiib.getWarehouseNumber()));

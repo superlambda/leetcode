@@ -79,7 +79,7 @@ public class BIDateMapping {
 	static {
 //		readCustomerMappingFromExcel();
 //		readSalesmanMappingFromExcel();
-		readProductMappingFromExcelForBI();
+//		readProductMappingFromExcelForBI();
 //		readProductGZMissing();
 //		readCustomerMappingFromExcelForBICheckNewCustomer();
 	}
@@ -319,7 +319,7 @@ public class BIDateMapping {
 		return ws1OrderNumber.toString();
 	}
 	
-	private static void readProductMappingFromExcelForBI() {
+	public static void readProductMappingFromExcelForBI() {
 		System.out.println("\n(!) Read product mapping file  start.\n");
 		try {
 			XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(
@@ -552,7 +552,11 @@ public class BIDateMapping {
 		iiib.setWs1SalesOrganisation("3120");
 		iiib.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(iiib.getCustomerNumber(),iiib.getName1()));
 		iiib.setPayer(BIDateMapping.getWS1CustomerNumber(iiib.getDebtor(),iiib.getDebtorName()));
-		iiib.setShipToCustomer(BIDateMapping.getWS1CustomerNumber(iiib.getGoodsRecipient(),iiib.getGoodsRecipientName()));
+		String shipToCustomer=BIDateMapping.getWS1CustomerNumber(iiib.getGoodsRecipient(),iiib.getGoodsRecipientName());
+		if(shipToCustomer.length()<6){
+			shipToCustomer=iiib.getWs1CustomerNumber();
+		}
+		iiib.setShipToCustomer(shipToCustomer);
 		iiib.setWs1RegisterNumber("0000"+iiib.getRegisterNumber());
 		iiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 		iiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(iiib.getWarehouseNumber()));

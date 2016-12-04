@@ -3,7 +3,6 @@ package com.wuerth.phoenix.basic.etnax.utilities.sap.export.bi;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +16,7 @@ import com.wuerth.phoenix.Phxbasic.enums.CustomerAccountStatus;
 import com.wuerth.phoenix.Phxbasic.models.CompanyPeriod;
 import com.wuerth.phoenix.Phxbasic.models.CompanyYear;
 import com.wuerth.phoenix.Phxbasic.models.CustomerAccount;
+import com.wuerth.phoenix.Phxbasic.models.CustomerClassification;
 import com.wuerth.phoenix.Phxbasic.models.CustomerTurnoverRange;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomer;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomerInvoice;
@@ -45,6 +45,8 @@ import com.wuerth.phoenix.bcutil.query.QueryParseException;
 import com.wuerth.phoenix.bcutil.query.QueryPredicate;
 import com.wuerth.phoenix.internal.bc.server.query.QueryResultEntry;
 import com.wuerth.phoenix.util.PDate;
+import com.wuerth.phoenix.util.money.Money;
+import com.wuerth.phoenix.util.money.MoneyController;
 
 /**
  * CASAExport Receive year as parameter, only support four years 2010-2014
@@ -100,6 +102,7 @@ public class CASAExport extends BatchRunner {
 	private Set<Long> validCustomerSet = new HashSet<Long>(2000);
 
 	private List<CustomerTurnoverRange> turnoverRangeList = null;
+	List<CustomerClassification> classificationList = null;
 
 	private int[] periodArray2015First = { 201512 };
 	private int[] periodArray2015All = { 201501, 201502, 201503, 201504, 201505, 201506, 201507, 201508, 201509, 201510,
@@ -180,8 +183,6 @@ public class CASAExport extends BatchRunner {
 		FileWriter outFile = new FileWriter(targetFile);
 		out1 = new PrintWriter(outFile);
 		writeInvoiceItemHeaderToCSV(out1);
-//		df.setMaximumFractionDigits(2);
-//		df.setGroupingUsed(false);
 		initializeDate(periodArray);
 		System.out.println("\n(!) Write txt file  start.\n");
 		searchDWCustomer(periodArray);
@@ -266,6 +267,7 @@ public class CASAExport extends BatchRunner {
 		}
 		turnoverRangeList = new ArrayList<CustomerTurnoverRange>(
 				_controller.getSingletonStatisticParameters().getAllChildCustomerTurnoverRange());
+		classificationList = new ArrayList<CustomerClassification>(_controller.getAllRootsCustomerClassification());
 	}
 
 	private void fillCustomerStatisticByPeriod(int[] periodArray) throws HookException, PUserException {
@@ -315,7 +317,9 @@ public class CASAExport extends BatchRunner {
 			
 			int year = periodArray[i] / 100;
 			int period = periodArray[i] % 100;
-
+			Money buying500Eur=MoneyController.getNewMoney(500, "EUR");
+			double buying500NZD=DWUtil.convertCurrencyInDate(_controller,buying500Eur,casaPeriodBean.getCurrentPeriodToDate()).getAmount();
+			System.out.print("Buying 500 in NZD is: "+buying500NZD);
 			QueryHelper qh = Query.newQueryHelper();
 			qh.setClass(DWCustomer.class);
 			qh.setDeepSelect(true);
@@ -372,6 +376,9 @@ public class CASAExport extends BatchRunner {
 						}
 						casa.setName1(customer.getName());
 						casa.setPotential(averagePotentialOfEmployee * customer.getNumberOfEmployees());
+						casa.setSml_potential_r12cy(getSML(casa.getPotential()));
+						casa.setSml_n_potential_r12cy(getCustomerPotentialSML(casa.getPotential()));
+						casa.setSml_n_potential_r12ly(casa.getSml_n_potential_r12cy());
 					}
 
 					double[] turnover_glep_cm = turnover_glep_cm_map.get(dwCustomer.getSurrogateKey());
@@ -397,10 +404,9 @@ public class CASAExport extends BatchRunner {
 						casa.setNum_of_cn_r12cy(turnover_glep_r12cy[4]);
 					}
 
-					String smlClassification = getSML(_controller, casa.getTurnover_r12cy());
+					String smlClassification = getSML(casa.getTurnover_r12cy());
 					casa.setSml_r12cy(smlClassification);
-					// TODO calculate 500EUR
-					if (casa.getTurnover_r12cy() >= 760D) {
+					if (casa.getTurnover_r12cy() >= buying500NZD) {
 						casa.setBuyingcustomer500_r12cy(true);
 					}
 
@@ -414,7 +420,7 @@ public class CASAExport extends BatchRunner {
 						casa.setNum_of_cn_r12ly(turnover_glep_r12ly[4]);
 					}
 
-					smlClassification = getSML(_controller, casa.getTurnover_r12ly());
+					smlClassification = getSML(casa.getTurnover_r12ly());
 					casa.setSml_r12ly(smlClassification);
 
 					// New Customer
@@ -532,7 +538,7 @@ public class CASAExport extends BatchRunner {
 
 	}
 
-	public String getSML(PhxbasicController controller, double turnoverAmount) {
+	public String getSML(double turnoverAmount) {
 		for (CustomerTurnoverRange tr : turnoverRangeList) {
 			if (tr.getMinAmount().getAmount() <= turnoverAmount
 					&& (tr.getMaxAmount() == null || tr.getMaxAmount().getAmount() >= turnoverAmount)) {
@@ -545,6 +551,22 @@ public class CASAExport extends BatchRunner {
 		}
 		return null;
 	}
+	
+	public String getCustomerPotentialSML(double turnoverAmount) {
+		String sml="";
+		for (CustomerClassification cc : classificationList) {
+			if (cc.getFromTurnover().getAmount() <= turnoverAmount
+					&& (cc.getToTurnover() == null || cc.getToTurnover().getAmount() >= turnoverAmount)) {
+				sml=cc.getName().substring(1);
+				if(sml.equals("PZ12")){
+					sml="ZE";
+				}
+				return sml;
+			}
+		}
+		return null;
+	}
+	
 
 	private void fillWS1Information(CASABean casa) {
 		casa.setWs1SalesOrganisation("3120");
