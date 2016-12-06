@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.wuerth.phoenix.Phxbasic.enums.ComplaintLineType;
 import com.wuerth.phoenix.Phxbasic.enums.DocType;
+import com.wuerth.phoenix.Phxbasic.enums.SalesmanStatus;
 import com.wuerth.phoenix.Phxbasic.models.CustomerAccount;
 import com.wuerth.phoenix.Phxbasic.models.CustomerInvoiceLine;
 import com.wuerth.phoenix.Phxbasic.models.CustomerOrderLine;
@@ -202,7 +203,10 @@ public class InvoiceItemExport extends BatchRunner {
 				iiib.setCustomerNumber(invoiceLine.getDWCustomer().getAccountNumber());
 				iiib.setName1(invoiceLine.getDWCustomer().getName1());
 				iiib.setProductNumber(invoiceLine.getDWProduct().getProductNumber());
-				iiib.setRegisterNumber(invoiceLine.getDWSalesman().getRegisterNumber());
+				if(SalesmanStatus.ACTIVE.equals(invoiceLine.getDWSalesman().getStatus())){
+					iiib.setRegisterNumber(invoiceLine.getDWSalesman().getRegisterNumber());
+				}
+				
 				Product product = _controller.lookupProduct(invoiceLine.getDWProduct().getProductNumber());
 				iiib.setPriceUnit(invoiceLine.getPrice().getUnit());
 				iiib.setStorageLocation("1000");
@@ -231,6 +235,7 @@ public class InvoiceItemExport extends BatchRunner {
 					weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
 							.multiply(cil.getDeliveryLine().getDeliveredQuantity().getAmount()));
 					iiib.setWeight(weight.getAmount());
+					iiib.setSalesDocumentType("ZTA");
 					// double glep =
 					// cil.getDeliveryLine().getCostPrice().getAmount();
 					// iiib.setGlep(glep);
@@ -249,7 +254,7 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setOrderNumber(col.getParentCustomerOrder().getOrderNumber());
 					iiib.setOrderDate(col.getParentCustomerOrder().getOrderDate());
 					iiib.setOrderQuantity((int)col.getOrderquantity().getAmount());
-
+					iiib.setSalesDocumentType("ZL2");
 					// double glep = col.getCostPrice().getAmount();
 					// iiib.setGlep(glep);
 					// iiib.setPfep(glep / 1.1);
@@ -341,7 +346,9 @@ public class InvoiceItemExport extends BatchRunner {
 					iiib.setPrice(retoureLine.getCcPrice().getAmount() / retoureLine.getCcPrice().getUnit());
 					iiib.setInvoiceQuantity((int)retoureLine.getQuantityReturned().getAmount());
 					iiib.setProductNumber(retoureLine.getDWProduct().getProductNumber());
-					iiib.setRegisterNumber(retoureLine.getDWSalesman().getRegisterNumber());
+					if(SalesmanStatus.ACTIVE.equals(retoureLine.getDWSalesman().getStatus())){
+						iiib.setRegisterNumber(retoureLine.getDWSalesman().getRegisterNumber());
+					}
 					Product product = _controller.lookupProduct(retoureLine.getDWProduct().getProductNumber());
 					iiib.setPriceUnit(retoureLine.getCcPrice().getUnit());
 
@@ -381,7 +388,9 @@ public class InvoiceItemExport extends BatchRunner {
 							* priceLine.getNewPrice().getUnit());
 					iiib.setInvoiceQuantity((int)priceLine.getNewQuantity().getAmount());
 					iiib.setProductNumber(priceLine.getDWProduct().getProductNumber());
-					iiib.setRegisterNumber(priceLine.getDWSalesman().getRegisterNumber());
+					if(SalesmanStatus.ACTIVE.equals(priceLine.getDWSalesman().getStatus())){
+						iiib.setRegisterNumber(priceLine.getDWSalesman().getRegisterNumber());
+					}
 					Product product = _controller.lookupProduct(priceLine.getDWProduct().getProductNumber());
 					iiib.setPriceUnit(priceLine.getNewPrice().getUnit());
 
@@ -454,15 +463,16 @@ public class InvoiceItemExport extends BatchRunner {
 					}
 
 					CustomerAccount customer = _controller.lookupCustomerAccount(iiib.getCustomerNumber());
-					if (creditNoteLine.getDWSalesman() != null) {
+					
+					if (creditNoteLine.getDWSalesman() != null
+							&& SalesmanStatus.ACTIVE.equals(creditNoteLine.getDWSalesman().getStatus())) {
 						iiib.setRegisterNumber(creditNoteLine.getDWSalesman().getRegisterNumber());
 					} else {
-
 						if (customer != null) {
 							SalesArea sa = customer.getSalesArea(iiib.getInvoiceDate());
 							if (sa != null) {
 								Salesman salesman = sa.getResponsibleSalesman(iiib.getInvoiceDate());
-								if (salesman != null) {
+								if (salesman != null&&SalesmanStatus.ACTIVE.equals(salesman.getSalesmanStatus())) {
 									iiib.setRegisterNumber(salesman.getRegisterNumber());
 								}
 							}
@@ -523,14 +533,14 @@ public class InvoiceItemExport extends BatchRunner {
 		iiib.setOrderReason("001");
 		iiib.setOrderCategory("1");
 		iiib.setDocumentCategory("M");
-		iiib.setSalesDocumentType("");
+		
 	}
 
 	private void fillfillWS1InformationForCreditNote(InvoiceItemInformationBean iiib) {
 		iiib.setOrderReason("001");
 		iiib.setOrderCategory("1");
 		iiib.setDocumentCategory("O");
-		iiib.setSalesDocumentType("");
+		iiib.setSalesDocumentType(iiib.getDocumentType());
 		if (iiib.getPriceUnit() == 10000) {
 			iiib.setPriceUnit(1000);
 			iiib.setPrice(iiib.getPrice() / 10);

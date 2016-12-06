@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.wuerth.phoenix.Phxbasic.enums.CustomerAccountStatus;
+import com.wuerth.phoenix.Phxbasic.enums.SalesmanStatus;
 import com.wuerth.phoenix.Phxbasic.models.CompanyPeriod;
 import com.wuerth.phoenix.Phxbasic.models.CompanyYear;
 import com.wuerth.phoenix.Phxbasic.models.CustomerAccount;
@@ -355,7 +356,7 @@ public class CASAExport extends BatchRunner {
 						SalesArea sa = customer.getSalesArea(casaPeriodBean.getCurrentPeriodToDate());
 						if (sa != null) {
 							Salesman salesman = sa.getResponsibleSalesman(casaPeriodBean.getCurrentPeriodToDate());
-							if (salesman != null) {
+							if (salesman != null&&SalesmanStatus.ACTIVE.equals(salesman.getSalesmanStatus())) {
 								casa.setRegisterNumber(salesman.getRegisterNumber());
 							}else{
 								System.out.println("\n Customer has no salesman assigned : "
@@ -571,7 +572,11 @@ public class CASAExport extends BatchRunner {
 	private void fillWS1Information(CASABean casa) {
 		casa.setWs1SalesOrganisation("3120");
 		casa.setWs1CustomerNumber(BIDateMapping.getWS1CustomerNumber(casa.getCustomerNumber(), casa.getName1()));
-		casa.setWs1RegisterNumber("0000" + casa.getRegisterNumber());
+		if(casa.getRegisterNumber()!=0){
+			casa.setWs1RegisterNumber("0000" + casa.getRegisterNumber());
+		}else{
+			casa.setWs1RegisterNumber("");
+		}
 	}
 
 	private void getFreightCost(Map<Long, Double> freightCostMap,PDate fromDate, PDate toDate)
@@ -925,28 +930,28 @@ public class CASAExport extends BatchRunner {
 		}
 		out1.println(sb.toString());
 
-		sb = new StringBuffer();
-		String[] header2 = { "Sales Organization", "Calendar Year/Month", "Sales Rep WS1", "Customer Number WS1",
-				"Customer Status", "Orsy Flag", "Active Customer Flag rolling 12 current Year",
-				"Buying Customer Flag rolling 12 current Year", "Zero Customer Flag rolling 12 current Year",
-				"New Customer Flag", "New Customer Flag Rolling 12 current Year", "Reactivated Customer Flag",
-				"Reactivated Customer Flag Rolling 12 current Year", "Lost Customer Flag Current Month",
-				"Lost Customer Flag rolling 12 current Year", "SML Classification rolling 12 last Year",
-				"SML Classification rolling 12 current Year",
-				"SML Classification depending on Potential rolling 12 current Year",
-				"SEA-N Classification rolling 12 last Year", "SEA-N Classification rolling 12 current Year",
-				"Potential", "Turnover rolling 12 Months last Year", "Turnover current Month",
-				"Turnover rolling 12 Months current Year", "Freight Costs Current Month",
-				"Cost of Goods PFEP rolling 12 Months last Year", "Cost of Goods PFEP current Month",
-				"Cost of Goods PFEP rolling 12 Months current Year", "Cost of Goods GLEP rolling 12 Months last Year",
-				"Cost of Goods GLEP current Month", "Cost of Goods GLEP rolling 12 Months current Year",
-				"Number of Credit Notes last Year", "Number of Credit Notes current Month",
-				"Number of Credit Notes current Year", "Number of Orders last Year", "Number of Orders current Month",
-				"Number of Orders current Year" };
-		for (int i = 0; i < header2.length; i++) {
-			sb.append(header2[i]).append(BIDateMapping.csvSeperator);
-		}
-		out1.println(sb.toString());
+//		sb = new StringBuffer();
+//		String[] header2 = { "Sales Organization", "Calendar Year/Month", "Sales Rep WS1", "Customer Number WS1",
+//				"Customer Status", "Orsy Flag", "Active Customer Flag rolling 12 current Year",
+//				"Buying Customer Flag rolling 12 current Year", "Zero Customer Flag rolling 12 current Year",
+//				"New Customer Flag", "New Customer Flag Rolling 12 current Year", "Reactivated Customer Flag",
+//				"Reactivated Customer Flag Rolling 12 current Year", "Lost Customer Flag Current Month",
+//				"Lost Customer Flag rolling 12 current Year", "SML Classification rolling 12 last Year",
+//				"SML Classification rolling 12 current Year",
+//				"SML Classification depending on Potential rolling 12 current Year",
+//				"SEA-N Classification rolling 12 last Year", "SEA-N Classification rolling 12 current Year",
+//				"Potential", "Turnover rolling 12 Months last Year", "Turnover current Month",
+//				"Turnover rolling 12 Months current Year", "Freight Costs Current Month",
+//				"Cost of Goods PFEP rolling 12 Months last Year", "Cost of Goods PFEP current Month",
+//				"Cost of Goods PFEP rolling 12 Months current Year", "Cost of Goods GLEP rolling 12 Months last Year",
+//				"Cost of Goods GLEP current Month", "Cost of Goods GLEP rolling 12 Months current Year",
+//				"Number of Credit Notes last Year", "Number of Credit Notes current Month",
+//				"Number of Credit Notes current Year", "Number of Orders last Year", "Number of Orders current Month",
+//				"Number of Orders current Year" };
+//		for (int i = 0; i < header2.length; i++) {
+//			sb.append(header2[i]).append(BIDateMapping.csvSeperator);
+//		}
+//		out1.println(sb.toString());
 		out1.flush();
 	}
 }

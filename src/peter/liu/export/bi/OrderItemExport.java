@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.wuerth.phoenix.Phxbasic.enums.CustomerOrderStatus;
+import com.wuerth.phoenix.Phxbasic.enums.SalesmanStatus;
 import com.wuerth.phoenix.Phxbasic.models.CustomerOrderLine;
 import com.wuerth.phoenix.Phxbasic.models.DWCustomerOrderLine;
 import com.wuerth.phoenix.Phxbasic.models.OwnCompany;
@@ -193,8 +194,10 @@ public class OrderItemExport extends BatchRunner {
 				} else {
 					oiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
 				}
-
-				oiib.setRegisterNumber(orderLine.getDWCustomerOrder().getDWSalesman().getRegisterNumber());
+				if (SalesmanStatus.ACTIVE.equals(orderLine.getDWCustomerOrder().getDWSalesman().getStatus())) {
+					oiib.setRegisterNumber(orderLine.getDWCustomerOrder().getDWSalesman().getRegisterNumber());
+				}
+				
 				oiib.setPriceUnit(orderLine.getPrice().getUnit());
 
 				oiib.setOrderItem(orderLine.getLineNumber());
@@ -207,15 +210,6 @@ public class OrderItemExport extends BatchRunner {
 				weight = weight.add(product.getOwnCompanyProductSalesUnit().getWeight().getNormalizedAmount()
 						.multiply(orderLine.getDeliveredQuantity().getAmount()));
 				oiib.setWeight(weight.getAmount());
-//				if (col.getWarehouseOrderLineMain() != null
-//						&& col.getWarehouseOrderLineMain().getAllPickingReservation() != null
-//						&& col.getWarehouseOrderLineMain().getAllPickingReservation().size() > 0) {
-//					PickingReservation pr = (PickingReservation) col.getWarehouseOrderLineMain()
-//							.getAllPickingReservation().get(0);
-//					oiib.setStorageLocation(pr.getFullLocationName());
-//				} else {
-//					oiib.setStorageLocation(" ");
-//				}
 
 				double glep = orderLine.getCostPrice().getAmount();
 				oiib.setCogsglep(glep * oiib.getOrderQuantity());
@@ -246,12 +240,16 @@ public class OrderItemExport extends BatchRunner {
 			shipToCustomer=oiib.getWs1CustomerNumber();
 		}
 		oiib.setShipToCustomer(shipToCustomer);
-		oiib.setWs1RegisterNumber("0000" + oiib.getRegisterNumber());
+		if(oiib.getRegisterNumber()!=0){
+			oiib.setWs1RegisterNumber("0000" + oiib.getRegisterNumber());
+		}else{
+			oiib.setWs1RegisterNumber("");
+		}
 		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setOrderReason("001");
 		oiib.setOrderCategory("1");
-		oiib.setSalesDocumentType("");
+		oiib.setSalesDocumentType("ZTA");
 		oiib.setDocumentCategory("C");
 	}
 
@@ -358,19 +356,19 @@ public class OrderItemExport extends BatchRunner {
 		}
 		out1.println(sb.toString());
 
-		sb = new StringBuffer();
-		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
-				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
-				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
-				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
-				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity",
-				"Number of Order Items", "Price Key", "Order/Credit Note", "Complaint Reason", "Order Value",
-				"Gross Value", "Net Value", "Discount", "Price Increase Surcharge", "Basis Price", "Freight Costs",
-				"Cost Value PFEP", "Cost Value GLD", "Tax Amount", "Gross Weight in Kilogramms" };
-		for (int i = 0; i < header2.length; i++) {
-			sb.append(header2[i]).append(BIDateMapping.csvSeperator);
-		}
-		out1.println(sb.toString());
+//		sb = new StringBuffer();
+//		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
+//				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
+//				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
+//				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
+//				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity",
+//				"Number of Order Items", "Price Key", "Order/Credit Note", "Complaint Reason", "Order Value",
+//				"Gross Value", "Net Value", "Discount", "Price Increase Surcharge", "Basis Price", "Freight Costs",
+//				"Cost Value PFEP", "Cost Value GLD", "Tax Amount", "Gross Weight in Kilogramms" };
+//		for (int i = 0; i < header2.length; i++) {
+//			sb.append(header2[i]).append(BIDateMapping.csvSeperator);
+//		}
+//		out1.println(sb.toString());
 		out1.flush();
 	}
 }

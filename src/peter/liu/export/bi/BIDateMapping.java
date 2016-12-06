@@ -287,11 +287,11 @@ public class BIDateMapping {
 	
 	public static String getPlantBasedOnWarehouse(String warehouseNumber){
 		if (warehouseNumber.equals("1")) {
-			return "CN0";
+			return "CN00";
 		} else if (warehouseNumber.equals("2")) {
-			return "CN2";
+			return "CN20";
 		} else{
-			return "CN0";
+			return "CN00";
 		}
 	}
 	
@@ -543,6 +543,7 @@ public class BIDateMapping {
 		}else{
 			ws1CustomerNumber=""+accountNumber;
 		}
+		ws1CustomerNumber = "0120" + ws1CustomerNumber;
 		customerMap.put(accountNumber, ws1CustomerNumber);
 		return ws1CustomerNumber;
 	}
@@ -557,7 +558,12 @@ public class BIDateMapping {
 			shipToCustomer=iiib.getWs1CustomerNumber();
 		}
 		iiib.setShipToCustomer(shipToCustomer);
-		iiib.setWs1RegisterNumber("0000"+iiib.getRegisterNumber());
+		if(iiib.getRegisterNumber()!=0){
+			iiib.setWs1RegisterNumber("0000"+iiib.getRegisterNumber());
+		}else{
+			iiib.setWs1RegisterNumber("");
+		}
+		
 		iiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 		iiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(iiib.getWarehouseNumber()));
 		String eeeeProductNumber = BIDateMapping.productMap.get(iiib.getProductNumber());
@@ -583,21 +589,21 @@ public class BIDateMapping {
 		out1.println(sb.toString());
 		
 		
-		sb = new StringBuffer();
-		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
-				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
-				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
-				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
-				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity", "Price Key",
-				"Billing Date", "Billing Document Number", "Billing Type", "Billing Item", "Billing Quantity",
-				"Number of Invoice Document Items", "Order/Credit Note", "Number of Credit Note Items",
-				"Complaint Reason", "Turnover", "Gross Value", "Net Value/Customer Turnover", "Discount",
-				"Price Increase Surcharge", "Basis Price", "Freight Costs", "Cost of Goods PFEP", "Cost of Goods GLEP",
-				"Tax Amount", "Netto Weight in Kilogramms" };
-		for (int i = 0; i < header2.length; i++) {
-			sb.append(header2[i]).append(csvSeperator);
-		}
-		out1.println(sb.toString());
+//		sb = new StringBuffer();
+//		String[] header2 = { "Sales Organization", "Sales Rep WS1", "Branch Office Did the Deal WS1",
+//				"Delivery Plant WS1", "Customer Number (Sold-to-Party) WS1", "Customer Number (Bill-to-Party) WS1",
+//				"Customer Number (Ship-to-Party) WS1", "Customer Number (Payer) WS1", "Order Document Entry Date",
+//				"Order Document", "Order Reason", "Order Category (Statistic)", "Sales Document Type",
+//				"Sales Document Category", "Article Number WS1", "Order Document Item", "Order Quantity", "Price Key",
+//				"Billing Date", "Billing Document Number", "Billing Type", "Billing Item", "Billing Quantity",
+//				"Number of Invoice Document Items", "Order/Credit Note", "Number of Credit Note Items",
+//				"Complaint Reason", "Turnover", "Gross Value", "Net Value/Customer Turnover", "Discount",
+//				"Price Increase Surcharge", "Basis Price", "Freight Costs", "Cost of Goods PFEP", "Cost of Goods GLEP",
+//				"Tax Amount", "Netto Weight in Kilogramms" };
+//		for (int i = 0; i < header2.length; i++) {
+//			sb.append(header2[i]).append(csvSeperator);
+//		}
+//		out1.println(sb.toString());
 		out1.flush();
 	}
 	
