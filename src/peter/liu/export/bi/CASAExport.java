@@ -26,7 +26,6 @@ import com.wuerth.phoenix.Phxbasic.models.DWCustomerStatisticDay;
 import com.wuerth.phoenix.Phxbasic.models.DWDay;
 import com.wuerth.phoenix.Phxbasic.models.DWDebitor;
 import com.wuerth.phoenix.Phxbasic.models.Debitor;
-import com.wuerth.phoenix.Phxbasic.models.PhxbasicController;
 import com.wuerth.phoenix.Phxbasic.models.SalesArea;
 import com.wuerth.phoenix.Phxbasic.models.Salesman;
 import com.wuerth.phoenix.basic.etnax.common.utilsdir.CalendarUtils;
@@ -332,7 +331,7 @@ public class CASAExport extends BatchRunner {
 				casaList = new LinkedList<CASABean>();
 				for (DWCustomer dwCustomer : list) {
 					if (!validCustomerSet.contains(dwCustomer.getSurrogateKey())) {
-						System.out.println("\n Customer did not purchase since 20120101 : " + dwCustomer.getAccountNumber());
+//						System.out.println("\n Customer did not purchase since 20130101 : " + dwCustomer.getAccountNumber());
 						continue;
 					}
 					CustomerAccount customer = _controller.lookupCustomerAccount(dwCustomer.getAccountNumber());
@@ -340,9 +339,9 @@ public class CASAExport extends BatchRunner {
 					if (customerCreationDate != null) {
 						if (customerCreationDate.getYear() > year || (customerCreationDate.getYear() == year
 								&& customerCreationDate.getMonth() + 1 > period)) {
-							System.out.println(
-									"\n Customer creation date later than period : " + customer.getAccountNumber()
-											+ " creationdate " + customerCreationDate + " period " + periodArray[i]);
+//							System.out.println(
+//									"\n Customer creation date later than period : " + customer.getAccountNumber()
+//											+ " creationdate " + customerCreationDate + " period " + periodArray[i]);
 							continue;
 						}
 					}
@@ -359,14 +358,16 @@ public class CASAExport extends BatchRunner {
 							if (salesman != null&&SalesmanStatus.ACTIVE.equals(salesman.getSalesmanStatus())) {
 								casa.setRegisterNumber(salesman.getRegisterNumber());
 							}else{
-								System.out.println("\n Customer has no salesman assigned : "
-										+ customer.getAccountNumber() + " in period " + periodArray[i]);
-								continue;
+//								System.out.println("\n Customer has no salesman assigned : "
+//										+ customer.getAccountNumber() + " in period " + periodArray[i]);
+								//TODO should the customer be exported ?
+//								continue;
 							}
 						}else{
-							System.out.println("\n Customer has no salesman assigned : "
-									+ customer.getAccountNumber() + " in period " + periodArray[i]);
-							continue;
+//							System.out.println("\n Customer has no salesman assigned : "
+//									+ customer.getAccountNumber() + " in period " + periodArray[i]);
+							//TODO
+//							continue;
 						}
 						
 						if (customer.getIsOrsyCustomerActivated() && customer.getOrsyRegisterDate() != null
@@ -559,7 +560,7 @@ public class CASAExport extends BatchRunner {
 			if (cc.getFromTurnover().getAmount() <= turnoverAmount
 					&& (cc.getToTurnover() == null || cc.getToTurnover().getAmount() >= turnoverAmount)) {
 				sml=cc.getName().substring(1);
-				if(sml.equals("PZ12")){
+				if(sml.equals("Z12")){
 					sml="ZE";
 				}
 				return sml;

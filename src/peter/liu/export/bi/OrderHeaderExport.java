@@ -127,16 +127,16 @@ public class OrderHeaderExport extends BatchRunner {
 					+ ohib.getCustomerNumber());
 		}
 		
-		String ws1RegisterNumber = BIDateMapping.getWS1RegisterNumber(
-				ownCompanyName, ohib.getRegisterNumber());
-		if (BIDateMapping.isWS1RUDUmmyRU(ws1RegisterNumber)
-				&& defaultWS1RegisterNumber != null) {
-			ws1RegisterNumber = defaultWS1RegisterNumber;
-		}
-		if (ohib.getWs1CustomerNumber().equals("0000999921")) {
-			ws1RegisterNumber = BIDateMapping.getDummyWS1RegisterNumber();
-		}
-		ohib.setWs1RegisterNumber(ws1RegisterNumber);
+//		String ws1RegisterNumber = BIDateMapping.getWS1RegisterNumber(
+//				ownCompanyName, ohib.getRegisterNumber());
+//		if (BIDateMapping.isWS1RUDUmmyRU(ws1RegisterNumber)
+//				&& defaultWS1RegisterNumber != null) {
+//			ws1RegisterNumber = defaultWS1RegisterNumber;
+//		}
+//		if (ohib.getWs1CustomerNumber().equals("0000999921")) {
+//			ws1RegisterNumber = BIDateMapping.getDummyWS1RegisterNumber();
+//		}
+//		ohib.setWs1RegisterNumber(ws1RegisterNumber);
 	}
 
 	private void writeOrderInfoToTxt() {

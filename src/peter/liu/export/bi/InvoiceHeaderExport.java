@@ -141,16 +141,16 @@ public class InvoiceHeaderExport extends BatchRunner {
 					+ ihib.getCustomerNumber());
 		}
 		
-		String ws1RegisterNumber = BIDateMapping.getWS1RegisterNumber(
-				ownCompanyName, ihib.getRegisterNumber());
-		if (BIDateMapping.isWS1RUDUmmyRU(ws1RegisterNumber)
-				&& defaultWS1RegisterNumber != null) {
-			ws1RegisterNumber = defaultWS1RegisterNumber;
-		}
-		if (ihib.getWs1CustomerNumber().equals("0000999921")) {
-			ws1RegisterNumber = BIDateMapping.getDummyWS1RegisterNumber();
-		}
-		ihib.setWs1RegisterNumber(ws1RegisterNumber);
+//		String ws1RegisterNumber = BIDateMapping.getWS1RegisterNumber(
+//				ownCompanyName, ihib.getRegisterNumber());
+//		if (BIDateMapping.isWS1RUDUmmyRU(ws1RegisterNumber)
+//				&& defaultWS1RegisterNumber != null) {
+//			ws1RegisterNumber = defaultWS1RegisterNumber;
+//		}
+//		if (ihib.getWs1CustomerNumber().equals("0000999921")) {
+//			ws1RegisterNumber = BIDateMapping.getDummyWS1RegisterNumber();
+//		}
+//		ihib.setWs1RegisterNumber(ws1RegisterNumber);
 	}
 
 	private void searchCreditNote() throws TimestampException, PUserException {

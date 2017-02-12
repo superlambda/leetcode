@@ -326,7 +326,11 @@ public class InvoiceItemExport extends BatchRunner {
 				iiib.setNumberOfInvoiceDocumentItems(0);
 				iiib.setOrderCreditNoteSign('G');
 				iiib.setTaxAmount(creditNoteLine.getCcTaxCreditAmount().getAmount());
-				iiib.setDiscount(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				if(creditNoteLine.getCcDiscountCreditAmount().getAmount()>0.0D){
+					iiib.setSurcharge(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				}else{
+					iiib.setDiscount(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				}
 				iiib.setCustomerNumber(creditNoteLine.getDWCustomer().getAccountNumber());
 				iiib.setName1(creditNoteLine.getDWCustomer().getName1());
 				iiib.setGrossValue(creditNoteLine.getCcBrutCreditAmount().getAmount()
@@ -531,14 +535,14 @@ public class InvoiceItemExport extends BatchRunner {
 
 	private void fillfillWS1InformationForInvoice(InvoiceItemInformationBean iiib) {
 		iiib.setOrderReason("001");
-		iiib.setOrderCategory("1");
+		iiib.setOrderCategory("001");
 		iiib.setDocumentCategory("M");
 		
 	}
 
 	private void fillfillWS1InformationForCreditNote(InvoiceItemInformationBean iiib) {
 		iiib.setOrderReason("001");
-		iiib.setOrderCategory("1");
+		iiib.setOrderCategory("001");
 		iiib.setDocumentCategory("O");
 		iiib.setSalesDocumentType(iiib.getDocumentType());
 		if (iiib.getPriceUnit() == 10000) {
@@ -553,6 +557,8 @@ public class InvoiceItemExport extends BatchRunner {
 		iiib.setCogsglep(iiib.getCogsglep() * (-1));
 		iiib.setCogspfep(iiib.getCogspfep() * (-1));
 		iiib.setWeight(iiib.getWeight() * (-1));
+		iiib.setOrderQuantity(iiib.getOrderQuantity()*(-1));
+		iiib.setSurcharge(iiib.getSurcharge()*(-1));
 	}
 
 	private CustomerInvoiceLine getCustomerInvoiceLine(DocType docType, int invoiceNumber, int invoiceLineNumber)

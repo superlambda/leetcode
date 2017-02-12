@@ -31,7 +31,7 @@ public class CheckNewCustomer extends BatchRunner {
 
 	private void checkNewCustomer() throws TimestampException, PUserException,
 			IOException {
-		BIDateMapping.newCustomer2011Set.size();
+//		BIDateMapping.newCustomer2011Set.size();
 	}
 
 	

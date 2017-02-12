@@ -192,7 +192,7 @@ public class OrderItemExport extends BatchRunner {
 				if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
 					oiib.setArticleNumber(eeeeProductNumber);
 				} else {
-					oiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+					oiib.setArticleNumber("");
 				}
 				if (SalesmanStatus.ACTIVE.equals(orderLine.getDWCustomerOrder().getDWSalesman().getStatus())) {
 					oiib.setRegisterNumber(orderLine.getDWCustomerOrder().getDWSalesman().getRegisterNumber());
@@ -248,7 +248,7 @@ public class OrderItemExport extends BatchRunner {
 		oiib.setPlant(BIDateMapping.getPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setDeliveryPlant(BIDateMapping.getDeliveryPlantBasedOnWarehouse(oiib.getWarehouseNumber()));
 		oiib.setOrderReason("001");
-		oiib.setOrderCategory("1");
+		oiib.setOrderCategory("001");
 		oiib.setSalesDocumentType("ZTA");
 		oiib.setDocumentCategory("C");
 	}

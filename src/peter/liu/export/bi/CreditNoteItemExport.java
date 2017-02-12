@@ -171,7 +171,11 @@ public class CreditNoteItemExport extends BatchRunner {
 				iiib.setNumberOfInvoiceDocumentItems(0);
 				iiib.setOrderCreditNoteSign('G');
 				iiib.setTaxAmount(creditNoteLine.getCcTaxCreditAmount().getAmount());
-				iiib.setDiscount(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				if(creditNoteLine.getCcDiscountCreditAmount().getAmount()>0.0D){
+					iiib.setSurcharge(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				}else{
+					iiib.setDiscount(creditNoteLine.getCcDiscountCreditAmount().getAmount());
+				}
 				iiib.setCustomerNumber(creditNoteLine.getDWCustomer().getAccountNumber());
 				iiib.setName1(creditNoteLine.getDWCustomer().getName1());
 				iiib.setGrossValue(creditNoteLine.getCcBrutCreditAmount().getAmount()
@@ -194,7 +198,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
 						iiib.setArticleNumber(eeeeProductNumber);
 					} else {
-						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+//						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
 					}
 
 					iiib.setRegisterNumber(retoureLine.getDWSalesman().getRegisterNumber());
@@ -237,7 +241,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
 						iiib.setArticleNumber(eeeeProductNumber);
 					} else {
-						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+//						iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
 					}
 
 					iiib.setRegisterNumber(priceLine.getDWSalesman().getRegisterNumber());
@@ -292,7 +296,7 @@ public class CreditNoteItemExport extends BatchRunner {
 					iiib.setPrice(creditNoteLine.getCcBrutCreditAmount().getAmount()
 							+ creditNoteLine.getCcDiscountCreditAmount().getAmount());
 					iiib.setInvoiceQuantity(1);
-					iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
+//					iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
 					if (creditNoteLine.getDWSalesman() != null) {
 						iiib.setRegisterNumber(creditNoteLine.getDWSalesman().getRegisterNumber());
 					} else {

@@ -41,50 +41,33 @@ public class BIDateMapping {
 	public static Map<Integer, String>	newCustomerMap	= new HashMap<Integer, String>();
 	
 	public static Map<String, String>	productMap	= new HashMap<String, String>(8000);
-	public static Set<String>	productGZMissingset	= new HashSet<String>(1000);
+	public static Set<String>	productGZMissingset	= new HashSet<String>(10);
 	
 	public static Map<String, String>	sapProductToSylProductMap	= new HashMap<String, String>(8000);
 	public static Map<String, String>	duplicatedProductTwoWayMap	= new HashMap<String, String>(2000);
 	
 	public static Map<Integer, String>	customerOrgMap	= new HashMap<Integer, String>(2000);
-	
-	public static Map<String, String>	gzSalesmanMap	= new HashMap<String, String>(100);
-	public static Map<String, String>	cqSalesmanMap	= new HashMap<String, String>(100);
-	public static Map<String, String>	cdSalesmanMap	= new HashMap<String, String>(100);
-	
 
 	public static Set<String>			duplicatedProductSet		= new HashSet<String>(
 																			2000);
-	public static String				dummyMaterialNumber			= "NB10000000990   1";
 	public static String				dummyCustomerNumber			= "0000999921";
-	private static String				customerMappingdataSourceForBI		= "../../etc/exportSAP/MAPPING_Customers_ALL.xlsx";
+	private static String				customerMappingdataSourceForBI		= "../../etc/exportSAP/Cust_chk_20170210.xlsx";
 	
 	private static String				productMappingdataSource		= "../../etc/exportSAP/MAPPING_MaterialMapping.xlsx";
-	
-//	private static String				productMissingSource		= "../../etc/exportSAP/MAPPING_MaterialMapping_Missing.xlsx";
-	private static String				salesmanMappingdataSource		= "../../etc/exportSAP/MAPPING_Salesrep_ALL.xlsx";
 
 	public static final DateFormat		dateFormat		= new SimpleDateFormat(
 																"yyyyMMdd");
 	
-	public static Map<Integer, String>	customerMap	= new HashMap<Integer, String>(2000);
-	public static Set<String>			newCustomer2011Set		= new HashSet<String>(
-			2000);
-	public static Set<String>			newCustomer2012Set		= new HashSet<String>(
-			2000);
-	public static Set<String>			newCustomer2013Set		= new HashSet<String>(
-			2000);
+	public static Map<String, String>	customerMap	= new HashMap<String, String>(20000);
 	
+	public static Map<Integer, String>	sToSCustomerMap	= new HashMap<Integer, String>(20000);
+	
+	public static Map<Integer, String>	customerNoMappingMap	= new HashMap<Integer, String>(2000);
 
 	static {
-//		readCustomerMappingFromExcel();
-//		readSalesmanMappingFromExcel();
+		readCustomerMappingFromExcel();
 //		readProductMappingFromExcelForBI();
-//		readProductGZMissing();
-//		readCustomerMappingFromExcelForBICheckNewCustomer();
 	}
-
-	
 	
 	private static void readCustomerMappingFromExcel() {
 		System.out.println("\n(!) Read excel file  start.\n");
@@ -100,57 +83,49 @@ public class BIDateMapping {
 				}
 				int customerMappingLoaded = 0;
 				while (row != null) {
-					XSSFCell cellCustomerNumber = row.getCell(0);
-					XSSFCell cellWS1CustomerNumber = row.getCell(1);
-					XSSFCell cellOrganization = row.getCell(2);
-					XSSFCell cellWS1RegisterNumber = row.getCell(3);
-					if (cellCustomerNumber == null
-							&& cellWS1CustomerNumber == null) {
+					XSSFCell cellCustomerNumber = row.getCell(1);
+					XSSFCell cellWS1CustomerNumber = row.getCell(0);
+					if (cellCustomerNumber == null&& cellWS1CustomerNumber == null) {
 						break;
 					}
-					int customerNumber = 0;
+					
+					String customerNumber = "";
 					try {
-						customerNumber = Integer.valueOf(cellCustomerNumber
-								.getRichStringCellValue().getString());
+						customerNumber = cellCustomerNumber
+								.getRichStringCellValue().getString();
 					} catch (Exception e) {
-						customerNumber = (int) cellCustomerNumber
-								.getNumericCellValue();
+						startRow++;
+						row = sheet.getRow(startRow);
+						continue;
+					}			
+					
+					if(customerNumber==null || customerNumber.equals("")){
+						startRow++;
+						row = sheet.getRow(startRow);
+						continue;
 					}
-							
+					
 					String wspCustomerNumber = cellWS1CustomerNumber
 							.getRichStringCellValue().getString();
 					if (wspCustomerNumber == null
 							|| "".equals(wspCustomerNumber.trim())) {
 						break;
 					}
-					String salesOrganization=null;
 					
-					if (cellOrganization.getCellType() == 0) {
-						salesOrganization = Integer.valueOf(
-								(int) cellOrganization.getNumericCellValue())
-								.toString();
-					} else {
-						salesOrganization = cellOrganization
-								.getRichStringCellValue().getString();
-					}
+					wspCustomerNumber = wspCustomerNumber.startsWith("0") ? wspCustomerNumber : 0 + wspCustomerNumber;
+					customerNumber = customerNumber.startsWith("0") ? customerNumber : 0 + customerNumber;
 					
-					String ws1RegisterNumber = cellWS1RegisterNumber
-							.getRichStringCellValue().getString();
-					String value = wspCustomerNumber + "," + salesOrganization
-							+ "," + ws1RegisterNumber;
-					if (!customerOrgMap.containsKey(customerNumber)) {
-						customerOrgMap.put(customerNumber, value);
+					if (!customerMap.containsKey(customerNumber)) {
+						customerMap.put(customerNumber,wspCustomerNumber);
 					} else {
-						System.out
-								.println("\n(!) WARING duplicated customer loaded: "
-										+ customerNumber);
+						System.out.println("\n(!) WARING duplicated mapping customer loaded: " + customerNumber);
 					}
 					
 					customerMappingLoaded++;
-					
 					startRow++;
 					row = sheet.getRow(startRow);
 				}
+				System.out.println("\n(!) WS1 customers loaded: " + customerMappingLoaded);
 			}
 
 		} catch (FileNotFoundException e) {
@@ -158,119 +133,9 @@ public class BIDateMapping {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		System.out.println("\n(*) Read excel file  end.");
 
-	}
-	
-	private static void readSalesmanMappingFromExcel() {
-		System.out.println("\n(!) Read excel file  start.\n");
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(
-					salesmanMappingdataSource));
-			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				XSSFSheet sheet = workbook.getSheetAt(i);
-				int startRow = 1;
-				XSSFRow row = sheet.getRow(startRow);
-				if (row == null) {
-					continue;
-				}
-				int registerMappingLoaded = 0;
-				while (row != null) {
-					XSSFCell cellRegisterNumber = row.getCell(0);
-					XSSFCell cellWS1RegisterNumber = row.getCell(1);
-//					XSSFCell cellCarbootStorageLocation = row.getCell(4);
-
-					if (cellRegisterNumber == null) {
-						startRow++;
-						row = sheet.getRow(startRow);
-						continue;
-					}
-					String registerNumber = "";
-					try {
-						registerNumber = cellRegisterNumber
-								.getRichStringCellValue().getString();
-					} catch (Exception e) {
-						try {
-							registerNumber = String.valueOf((int)cellRegisterNumber
-									.getNumericCellValue());
-						} catch (Exception e1) {
-							e.printStackTrace();
-						}
-					}
-					if (registerNumber.trim().equals("")) {
-						startRow++;
-						row = sheet.getRow(startRow);
-						continue;
-					}
-
-					String ws1RegisterNumber = cellWS1RegisterNumber
-							.getRichStringCellValue().getString();
-					if (ws1RegisterNumber == null
-							|| "".equals(ws1RegisterNumber.trim())) {
-						break;
-					}
-
-//					String carbootStorageLocation = cellCarbootStorageLocation
-//							.getRichStringCellValue().getString();
-					String value = ws1RegisterNumber + ","
-							+ "storagelocation";
-					if (sheet.getSheetName().equals("BL90")) {
-						gzSalesmanMap.put(String.valueOf(registerNumber), value);
-					} else if (sheet.getSheetName().equals("BN90")) {
-						cdSalesmanMap.put(String.valueOf(registerNumber), value);
-					} else if (sheet.getSheetName().equals("BP90")){
-						cqSalesmanMap.put(String.valueOf(registerNumber), value);
-					}else{
-						break;
-					}
-
-					registerMappingLoaded++;
-					System.out.println("\n(!) " + sheet.getSheetName() + " "
-							+ registerNumber + "-->" + value
-							+ " salesmen loaded: " + registerMappingLoaded);
-					startRow++;
-					row = sheet.getRow(startRow);
-				}
-			}
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("\n(*) Read excel file  end.");
-
-	}
-	
-	public static String getWS1RegisterNumber(String ownCompanyName,
-			int registerNumber) {
-		String registerNumberPlant = null;
-		if (ownCompanyName.equals("伍尔特（重庆）五金工具有限公司")) {
-			registerNumberPlant = cdSalesmanMap.get(String
-					.valueOf(registerNumber));
-			if (registerNumberPlant == null) {
-				registerNumberPlant = cqSalesmanMap.get(String
-						.valueOf(registerNumber));
-			}
-			System.out.println("\n(*) get ws1 registernumber for CQ: "
-					+ registerNumber);
-
-		} else {
-			System.out.println("\n(*) get ws1 registernumber for GZ: "
-					+ registerNumber);
-			registerNumberPlant = gzSalesmanMap.get(String
-					.valueOf(registerNumber));
-		}
-		String ws1RegisterNumber = "";
-		if (registerNumberPlant == null) {
-			ws1RegisterNumber = getDummyWS1RegisterNumber();
-			System.out.println("\n Salesman mapping can not find : "
-					+ registerNumber);
-		} else {
-			String[] registerNumberArray = registerNumberPlant.split(",");
-			ws1RegisterNumber = registerNumberArray[0];
-		}
-		return ws1RegisterNumber;
 	}
 
 	public static String getDummyWS1RegisterNumber() {
@@ -396,55 +261,6 @@ public class BIDateMapping {
 
 	}
 	
-//	private static void readProductGZMissing() {
-//		System.out.println("\n(!) Read product missing mapping file  start.\n");
-//		try {
-//			XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(
-//					productMissingSource));
-//			XSSFSheet sheet = workbook.getSheetAt(0);
-//			int startRow = 0;
-//			XSSFRow row = sheet.getRow(startRow);
-//			int productMappingLoaded = 0;
-//			while (row != null) {
-//				XSSFCell cellProductNumber = row.getCell(0);
-//				
-//				if (cellProductNumber == null) {
-//					break;
-//				}
-//				String productNumber = null;
-//				try {
-//					productNumber = cellProductNumber.getRichStringCellValue()
-//							.getString().trim();
-//				} catch (Exception e) {
-//					if (cellProductNumber != null) {
-//						long productNumberLong = (long) cellProductNumber
-//								.getNumericCellValue();
-//						productNumber = String.valueOf(productNumberLong)
-//								.trim();
-//					}
-//				}				
-//
-//				if (productNumber == null || "".equals(productNumber.trim())) {
-//					break;
-//				}
-//				
-//				productGZMissingset.add(productNumber);
-//				
-//				productMappingLoaded++;
-//				System.out.println("\n(!) " + sheet.getSheetName()
-//						+ " products loaded: " + productMappingLoaded);
-//				startRow++;
-//				row = sheet.getRow(startRow);
-//			}
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("\n(*) Read product mapping file  end.");
-//
-//	}
-	
 	
 	public static String fillWS1RegisterNumber(int registerNumber) {
 		String rn = String.valueOf(registerNumber);
@@ -481,8 +297,8 @@ public class BIDateMapping {
 	
 	public static String getWS1CustomerNumber(int accountNumber,String name1){
 		
-		if (customerMap.containsKey(accountNumber)) {
-			return customerMap.get(accountNumber);
+		if (sToSCustomerMap.containsKey(accountNumber)) {
+			return sToSCustomerMap.get(accountNumber);
 		}
 		String ws1CustomerNumber = "";
 
@@ -544,7 +360,17 @@ public class BIDateMapping {
 			ws1CustomerNumber=""+accountNumber;
 		}
 		ws1CustomerNumber = "0120" + ws1CustomerNumber;
-		customerMap.put(accountNumber, ws1CustomerNumber);
+		//TODO Check this line later, temporaily set to empty if customer is not in the mapping file
+		if(!customerMap.containsKey(ws1CustomerNumber)){
+			if(!customerNoMappingMap.containsKey(accountNumber)){
+				customerNoMappingMap.put(accountNumber, ws1CustomerNumber);
+				System.out.println("\n(!) WARING no mappping sylvestrix customer: " + accountNumber +" calculated customer: " +ws1CustomerNumber);
+			}
+			ws1CustomerNumber= "";
+		}else{
+			ws1CustomerNumber = customerMap.get(ws1CustomerNumber);
+		}
+		sToSCustomerMap.put(accountNumber, ws1CustomerNumber);
 		return ws1CustomerNumber;
 	}
 	
@@ -570,9 +396,9 @@ public class BIDateMapping {
 		if (eeeeProductNumber != null && !eeeeProductNumber.trim().equals("")) {
 			iiib.setArticleNumber(eeeeProductNumber);
 		} else {
-			iiib.setArticleNumber(BIDateMapping.dummyMaterialNumber);
-			System.out.println("Error: ArticalNumber not found for Invoice: " + iiib.getInvoiceNumber() + " Line: "
-					+ iiib.getInvoiceItem());
+			iiib.setArticleNumber("");
+//			System.out.println("Error: ArticalNumber not found for Invoice: " + iiib.getInvoiceNumber() + " Line: "
+//					+ iiib.getInvoiceItem());
 		}
 	}
 	
@@ -606,45 +432,6 @@ public class BIDateMapping {
 //		out1.println(sb.toString());
 		out1.flush();
 	}
-	
-	// Sales Organization
-		// Sales Rep WS1
-		// Branch Office Did the Deal WS1
-		// Delivery Plant WS1
-		// Customer Number (Sold-to-Party) WS1
-		// Customer Number (Bill-to-Party) WS1
-		// Customer Number (Ship-to-Party) WS1
-		// Customer Number (Payer) WS1
-		// Order Document Entry Date
-		// Order Document
-		// Order Reason
-		// Order Category (Statistic)
-		// Sales Document Type
-		// Sales Document Category
-		// Article Number WS1
-		// Order Document Item
-		// Order Quantity
-		// Price Key
-		// Billing Date
-		// Billing Document Number
-		// Billing Type
-		// Billing Item
-		// Billing Quantity
-		// Number of Invoice Document Items
-		// Order/Credit Note
-		// Number of Credit Note Items
-		// Complaint Reason
-		// Turnover
-		// Gross Value
-		// Net Value/Customer Turnover
-		// Discount
-		// Price Increase Surcharge
-		// Basis Price
-		// Freight Costs
-		// Cost of Goods PFEP
-		// Cost of Goods GLEP
-		// Tax Amount
-		// Netto Weight in Kilogramms
 
 	public static void writeInvoiceItemInfoToTxt(List<InvoiceItemInformationBean> invoiceItemInfoList, PrintWriter out1,
 			int numberOfInvoiceItems) {
@@ -739,7 +526,14 @@ public class BIDateMapping {
 			// Price Increase Surcharge No logic, just correct format; if not
 			// available use LOGTO minus LONTO; If the Document is a Creditnote,
 			// put a minus in front of the Keyfigure
-			sb.append("0,00").append(BIDateMapping.csvSeperator);
+			if(iiib.getSurcharge()!=0.0D){
+				sb.append(convertDotToComma(
+						FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(iiib.getSurcharge()))))
+						.append(BIDateMapping.csvSeperator);
+			}else{
+				sb.append("0,00").append(BIDateMapping.csvSeperator);
+			}
+		
 			// Basis Price
 			sb.append(convertDotToComma(
 					FormatHelper.getPriceFormat().format(DoubleUtils.getRoundedAmount(iiib.getPrice()))))
