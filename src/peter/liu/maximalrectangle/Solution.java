@@ -1,9 +1,9 @@
 package peter.liu.maximalrectangle;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -25,103 +25,105 @@ public class Solution {
 	public int maximalRectangle(char[][] matrix) {
 		
 		int maxRectangle = 0;
-		Map<String, List<int[]>> vertexMap = new HashMap<String, List<int[]>>();
+		Map<String, Set<Pair>> vertexMap = new HashMap<>();
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix[i].length; j++) {
-				if(i-2>=0){
+				if(i-2>=0&&matrix[i-2][j]=='1'){
 					vertexMap.remove((i - 2) + "," + j);
 				}
+				
+				if(i-1>=0&&j-1>=0&&matrix[i-1][j-1]=='1'){
+					vertexMap.remove((i - 1) + "," + (j-1));
+				}
+				
 				if (matrix[i][j] == '0') {
 					continue;
 				}
+				
+				String itself=i + "," + j;
+				Set<Pair> set = new HashSet<>();
+				Pair vertexitSelf =new Pair(i,j);
+				set.add(vertexitSelf);
 
-				if (i != 0 && j == 0||(j>0&&matrix[i][j-1]=='0')) {
-					if (i>0&&matrix[i - 1][j] == '1') {
-						List<int[]> vertPreList = vertexMap.get((i - 1) + "," + j);
-						List<int[]> list = new ArrayList<>();
-						for(int k=0;k<vertPreList.size();k++){
-							int[] vertex = vertPreList.get(k);
-							if(vertex[1]==j){
-								list.add(vertex);
-								int area = i - vertex[0] + 1;
-								maxRectangle = maxRectangle < area ? area : maxRectangle;
-							}
-						}
-					
-						vertexMap.put(i + "," + j, list);
-					}
-
-				} else if ((i == 0 && j != 0) || (i > 0 && matrix[i - 1][j] == '0')) {
-					if (j>0&&matrix[i][j - 1] == '1') {
-						List<int[]> horizPreList = vertexMap.get((i) + "," + (j - 1));
-						List<int[]> list = new ArrayList<>();
-						
-						for(int k=0;k<horizPreList.size();k++){
-							int[] vertex = horizPreList.get(k);
-							if(vertex[0]==i){
-								list.add(vertex);
-								int area = j - vertex[1] + 1;
-								maxRectangle = maxRectangle < area ? area : maxRectangle;
-							}
-						}
-						
-						vertexMap.put(i + "," + j, list);
-					}
-
-				}else if(i>0&&j>0&&matrix[i-1][j]=='1'&&matrix[i][j-1]=='1'){
-					
-					List<int[]> vertPreList = vertexMap.get((i - 1) + "," + j);
-					List<int[]> horizPreList = vertexMap.get((i) + "," + (j - 1));
-					
-					List<int[]> list = new ArrayList<>();
-					for(int k=0;k<vertPreList.size();k++){
-						int[] vertex = vertPreList.get(k);
-						if(contains(horizPreList,vertex)){
-							list.add(vertex);
-							int area = (i - vertex[0] + 1)*(j - vertex[1] + 1);
-							maxRectangle = maxRectangle < area ? area : maxRectangle;
-						}else{
-							if(vertex[1]==j){
-								list.add(vertex);
-								int area = i - vertex[0] + 1;
-								maxRectangle = maxRectangle < area ? area : maxRectangle;
-							}
-						}
-					}
-					for(int k=0;k<horizPreList.size();k++){
-						int[] vertex = horizPreList.get(k);
-						if(!contains(vertPreList,vertex)){
-							if(vertex[0]==i){
-								list.add(vertex);
-								int area = j - vertex[1] + 1;
-								maxRectangle = maxRectangle < area ? area : maxRectangle;
-							}
-						}
-					}
-					vertexMap.put(i + "," + j, list);
+				Set<Pair> vertPreSet = null;
+				Set<Pair> horizPreSet = null;
+				if(i>=1){
+					vertPreSet = vertexMap.get((i - 1) + "," + j);
+				}
+				if(j>=1){
+					horizPreSet = vertexMap.get((i) + "," + (j - 1));
 				}
 				
-				List<int[]> list = vertexMap.get(i + "," + j);
-				if(list ==null){
-					list= new ArrayList<>();
+				if(vertPreSet==null && horizPreSet==null){
+					vertexMap.put(itself, set);
+					maxRectangle = maxRectangle < 1? 1:maxRectangle;
+					continue;
 				}
-				int[] vertexitSelf ={i,j};
-				list.add(vertexitSelf);
-				maxRectangle = maxRectangle < 1? 1:maxRectangle;
-				vertexMap.put(i+","+j, list);
+				
+				if(vertPreSet ==null){
+					vertPreSet =  new HashSet<>();
+				}
+				if(horizPreSet ==null){
+					horizPreSet =  new HashSet<>();
+				}
+				
+				for(Pair vertex: vertPreSet){	
+					if(horizPreSet.contains(vertex)){
+						set.add(vertex);
+						int area = (i - vertex.row + 1)*(j - vertex.column + 1);
+						maxRectangle = maxRectangle < area ? area : maxRectangle;
+					}else{
+						if(vertex.column==j){
+							set.add(vertex);
+							int area = i - vertex.row + 1;
+							maxRectangle = maxRectangle < area ? area : maxRectangle;
+						}
+					}
+				}
+			
+				for(Pair vertex: horizPreSet){
+					if(!vertPreSet.contains(vertex)){
+						if(vertex.row==i){
+							set.add(vertex);
+							int area = j - vertex.column + 1;
+							maxRectangle = maxRectangle < area ? area : maxRectangle;
+						}
+					}
+				}	
+				
+				vertexMap.put(itself, set);
 			}
 		}
 		return maxRectangle;
 	}
 	
-	private boolean contains(List<int[]> preList,int[] vertex){
-		for(int i = 0;i<preList.size();i++){
-			int[] vertixToCheck=preList.get(i);
-			if(vertixToCheck[0]==vertex[0]&&vertixToCheck[1]==vertex[1]){
-				return true;
-			}
+//	private boolean contains(List<int[]> preList,int[] vertex){
+//		for(int[] vertixToCheck: preList){
+//			if(vertixToCheck[0]==vertex[0]&&vertixToCheck[1]==vertex[1]){
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	
+	class Pair{
+		Integer row,column;
+		
+		public Pair(Integer i,Integer j){
+			row =i;
+			column=j;
 		}
-		return false;
+		
+		public boolean equals(Object obj) {
+			if (! (obj instanceof Pair)){
+				return false;
+			}
+			Pair pair=(Pair) obj;
+	        return this.row==pair.row&&this.column==pair.column;
+	    }
+		public int hashCode(){
+			return row.hashCode()+column.hashCode();
+		}
 	}
 	
 	
