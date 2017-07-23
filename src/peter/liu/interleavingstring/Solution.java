@@ -37,7 +37,7 @@ public class Solution {
 	
 	private boolean canGoon(String s1, String s2, String s3, int s1Index,int s2Index,int s3Index){
 		
-		String key=s1Index +","+s2Index+","+s3Index;
+		String key=s1Index +","+s2Index;
 		if(memMap.containsKey(key)){
 			return memMap.get(key);
 		}
