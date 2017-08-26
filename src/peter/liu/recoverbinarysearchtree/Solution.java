@@ -25,25 +25,83 @@ import java.util.Stack;
 public class Solution {
 	public void recoverTree(TreeNode root) {
 		List<TreeNode> list=new ArrayList<>();
-		List<Integer> numberList=new ArrayList<>();
-		trace(root,list,numberList);
-		numberList.sort((Integer h1, Integer h2) -> h1.compareTo(h2));
-		for(int i=0;i<numberList.size();i++){
-			if(list.get(i).val!=numberList.get(i)){
-				list.get(i).val=numberList.get(i);
-			}
-		}
+		trace(root,list);
+		//A slowest way is trying to sort the list,
+		TreeNode firstElement = null;
+		TreeNode secondElement = null;
+		/*
+		 * The reason for this initialization is to avoid null pointer exception
+		 * in the first comparison when prevElement has not been initialized
+		 */
+	    TreeNode prevElement = new TreeNode(Integer.MIN_VALUE);
+	    
+	    for(int i=0;i<list.size();i++){
+	    	if (firstElement == null && prevElement.val >= list.get(i).val) {
+	            firstElement = prevElement;
+	        }
+	        // If first element is found, assign the second element to the root (refer to 2 in the example above)
+	        if (firstElement != null && prevElement.val >= list.get(i).val) {
+	            secondElement = list.get(i);
+	        }        
+	        prevElement = list.get(i);
+	    }
+	    
+	    int temp = firstElement.val;
+        firstElement.val = secondElement.val;
+        secondElement.val = temp;
 		
 	}
-	private void trace(TreeNode node,List<TreeNode> list,List<Integer> numberList){
+	private void trace(TreeNode node,List<TreeNode> list){
 		if(node==null){
 			return;
 		}
-		trace(node.left,list,numberList);
+		trace(node.left,list);
 		list.add(node);
-		numberList.add(node.val);
-		trace(node.right,list,numberList);
+		trace(node.right,list);
 	}
+	
+//	TreeNode firstElement = null;
+//	TreeNode secondElement = null;
+//	// The reason for this initialization is to avoid null pointer exception in
+//	// the first comparison when prevElement has not been initialized
+//	TreeNode prevElement = new TreeNode(Integer.MIN_VALUE);
+//
+//	public void recoverTree(TreeNode root) {
+//
+//		// In order traversal to find the two elements
+//		traverse(root);
+//
+//		// Swap the values of the two nodes
+//		int temp = firstElement.val;
+//		firstElement.val = secondElement.val;
+//		secondElement.val = temp;
+//	}
+//
+//	private void traverse(TreeNode root) {
+//
+//		if (root == null){
+//			return;
+//		}
+//		traverse(root.left);
+//
+//		// Start of "do some business",
+//		// If first element has not been found, assign it to prevElement (refer
+//		// to 6 in the example above)
+//		if (firstElement == null && prevElement.val >= root.val) {
+//			firstElement = prevElement;
+//		}
+//
+//		// If first element is found, assign the second element to the root
+//		// (refer to 2 in the example above)
+//		if (firstElement != null && prevElement.val >= root.val) {
+//			secondElement = root;
+//		}
+//		prevElement = root;
+//
+//		// End of "do some business"
+//
+//		traverse(root.right);
+//	}
 }
 
 class TreeNode {
