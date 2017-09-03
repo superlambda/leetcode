@@ -36,32 +36,6 @@ After calling your function, the tree should look like:
  *
  */
 public class Solution {
-//	public void connect(TreeLinkNode root) {
-//		if(root==null){
-//			return;
-//		}
-//		LinkedList<TreeLinkNode> queue = new LinkedList<>();
-//		queue.add(root);
-//		while (!queue.isEmpty()) {
-//			LinkedList<TreeLinkNode> temp = new LinkedList<>();
-//			for (TreeLinkNode node : queue) {
-//				if (node.left != null) {
-//					if(!temp.isEmpty()){
-//						temp.getLast().next=node.left;
-//					}
-//					temp.addLast(node.left);
-//				}
-//				if (node.right != null) {
-//					if(!temp.isEmpty()){
-//						temp.getLast().next=node.right;
-//					}
-//					temp.addLast(node.right);
-//				}
-//			}
-//			queue = temp;
-//		}
-//
-//	}
 	public void connect(TreeLinkNode root) {
 		TreeLinkNode levelStart = root;
 		while (levelStart != null) {
