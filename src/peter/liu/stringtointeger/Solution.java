@@ -77,4 +77,87 @@ public class Solution {
 			}
 		}
 	}
+	
+//	public int myAtoi(String s) {
+//		String newString=s.trim();
+//		if(newString.length()==0) {
+//			return 0;
+//		}
+//		boolean isNegative=false;
+//		int startIndex=0;
+//		if(newString.charAt(0)=='-') {
+//			isNegative=true;
+//			startIndex =1;
+//		}else if(newString.charAt(0)=='+') {
+//			startIndex=1;
+//		}
+//		int j=startIndex;
+//		long result=0;
+//		while(j<newString.length()&&Character.isDigit(newString.charAt(j))){
+//			result=result*10+Character.getNumericValue(newString.charAt(j));
+//			if(isNegative&&result*-1<Integer.MIN_VALUE) {
+//				return Integer.MIN_VALUE;
+//			}
+//			if(!isNegative&&result>Integer.MAX_VALUE) {
+//				return Integer.MAX_VALUE;
+//			}
+//			j++;
+//		}
+//		return isNegative? (int)result*-1:(int)result;
+//        
+//    }
+	
+//	public int myAtoi(String s) {
+//		String newString=s.trim();
+//		if(newString.length()==0) {
+//			return 0;
+//		}
+//		boolean isNegative=false;
+//		int startIndex=0;
+//		if(newString.charAt(0)=='-') {
+//			isNegative=true;
+//			startIndex =1;
+//		}else if(newString.charAt(0)=='+') {
+//			startIndex=1;
+//		}
+//		int j=startIndex;
+//		int result=0;
+//		while(j<newString.length()&&Character.isDigit(newString.charAt(j))){
+//			if(result>Integer.MAX_VALUE/10||(result==Integer.MAX_VALUE/10&&newString.charAt(j)-'0'>7)) {
+//				return isNegative? Integer.MIN_VALUE:Integer.MAX_VALUE;
+//			}
+//			result=result*10+newString.charAt(j)-'0';
+//			j++;
+//		}
+//		return isNegative? (int)result*-1:(int)result;
+//        
+//    }
+	
+	public int myAtoi(String s) {
+		boolean isNegative=false;
+		int startIndex=0;
+		while(startIndex<s.length()&&s.charAt(startIndex)==' ') {
+			startIndex++;
+		}
+		if(startIndex==s.length()) {
+			return 0;
+		}
+		if(s.charAt(startIndex)=='-') {
+			isNegative=true;
+			startIndex +=1;
+		}else if(s.charAt(startIndex)=='+') {
+			startIndex +=1;
+		}
+		int j=startIndex;
+		int result=0;
+		while(j<s.length()&&Character.isDigit(s.charAt(j))){
+			if(result>Integer.MAX_VALUE/10||(result==Integer.MAX_VALUE/10&&s.charAt(j)-'0'>7)) {
+				return isNegative? Integer.MIN_VALUE:Integer.MAX_VALUE;
+			}
+			result=result*10+s.charAt(j)-'0';
+			j++;
+		}
+		return isNegative? (int)result*-1:(int)result;
+        
+    }
 }

@@ -16,5 +16,14 @@ public class SolutionTest {
 		assertEquals(
 				new Solution().isPalindrome("A man, a plan, a canal: Panama"),
 				true);
+
+		assertEquals(
+				new Solution().isPalindrome(" "),
+				true);
+		assertEquals(
+				new Solution().isPalindrome("0P"),
+				false);
+		
+		
 	}
 }

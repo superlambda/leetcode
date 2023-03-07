@@ -18,8 +18,6 @@ public class Solution {
 		int aIndex = aAr.length - 1;
 		int bIndex = bAr.length - 1;
 		int finger = 0;
-		
-		
 		while (aIndex >= 0 && bIndex >= 0) {
 			int aNumber = aAr[aIndex] == '1' ? 1 : 0;
 			int bNumber = bAr[bIndex] == '1' ? 1 : 0;
@@ -27,6 +25,9 @@ public class Solution {
 			finger = putAndSet(sum, stack);
 			aIndex--;
 			bIndex--;
+			
+			
+			
 		}
 		while (aIndex >= 0) {
 			int aNumber = aAr[aIndex] == '1' ? 1 : 0;

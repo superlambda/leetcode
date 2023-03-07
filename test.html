@@ -1,0 +1,169 @@
+<html>
+<style type="text/css">
+/*Add style rules here*/
+
+/* ID selector */
+#container {
+	width: 960px;
+	height: 10em;
+	margin: 40 auto;
+	padding-left: 40;
+	padding-right: 40;
+	border: solid 0.8em #eee;
+	font-size: 1em
+}
+
+/* Class selector */
+.box {
+	padding: 10px;
+	margin: 10px;
+	width: 240px;
+}
+
+/* Descendant Combinator selector */
+#container .box {
+	float: left;
+	width: 160px;
+	padding-bottom: 15px;
+}
+
+/* Child Combinator selector */
+#container>.box-2 {
+	padding-top: 15px;
+	color: red;
+	float: left;
+	width: 160px;
+	padding-bottom: 15px;
+}
+
+/* General Sibling selector*/
+h2 ~ p {
+	margin-bottom: 20px;
+	color: green;
+}
+
+/*  Adjacent Sibling Combinator selector */
+h3+p {
+	text-indent: 1.Sem;
+	color: blue;
+}
+
+/* Attribute selector */
+input [type=”text”] {
+	background-color: #444;
+	width: 200px;
+}
+
+/* Pseudo-classes selector */
+a:hover {
+	color: red;
+}
+
+/* Pseudo-element */
+p::first-line {
+	/*color: blue;*/
+	font-variant: small-caps;
+}
+
+/* Centering with table */
+.cn {
+	display: table-cell;
+	width: 500px;
+	height: 500px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.inner {
+	display: inline-block;
+	width: 200px;
+	height: 200px;
+}
+
+.cn_transform {
+	position: relative;
+	width: 500px;
+	height: 500px;
+}
+
+.inner_transform {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 200px;
+	height: 200px;
+}
+
+.cn_flexbox {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+</style>
+
+
+<body>
+
+	<div style="color: red; background: black">Hello</div>
+	<div>World</div>
+
+	<div id="container">This is a ID selector</div>
+
+
+	<div class="box">This is a class selector</div>
+
+
+	<div id="container">
+		<div class="box">This is descendant combinator</div>
+		<div class="box-2">This is child combinator</div>
+	</div>
+
+
+	<h2>General Sibling Combinator with color green</h2>
+	<p>Sibling Combinator</p>
+	<p>Sibling Combinator</p>
+	<p>Sibling Combinator</p>
+	<div class=”box”>
+		<p>Not Sibling Combinator as it is wrapped in division</p>
+		<p>Not Sibling Combinator as it is wrapped in division</p>
+	</div>
+
+
+	<h2>Adjacent Sibling Combinator with color blue</h2>
+	<h3>P directly after this should be blue</h3>
+	<p>Adjacent Sibling Combinator</p>
+	<p>Not Adjacent Sibling Combinator</p>
+	<div class=”box”>
+		<h3>P directly after this should be blue</h3>
+		<p>Not Sibling Combinator as it is wrapped in division</p>
+	</div>
+
+
+	<input type="text" value="Attribute Selector">
+	<br />
+
+	<a href="https://www.w3schools.com">Pseudo-classes selector</a>
+
+	<p>
+		First line for pseudo-element<br /> Second line does not change
+	</p>
+
+
+	<div class="cn">
+		<div class="inner">center align a division inside another
+			division</div>
+	</div>
+
+	<div class="cn_transform">
+		<div class="inner_transform">center align a division inside
+			another division using transform</div>
+	</div>
+
+	<div class="cn_flexbox">
+		<div class="inner_flexbox">center align a division inside
+			another division using fleuxbox</div>
+	</div>
+
+</body>
+</html>

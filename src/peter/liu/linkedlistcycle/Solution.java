@@ -11,36 +11,28 @@ package peter.liu.linkedlistcycle;
  *
  */
 public class Solution {
-//	public boolean hasCycle(ListNode head) {
-//		Set<ListNode> set=new HashSet<>(128);
-//		ListNode iterator=head;
-//		while(iterator!=null){
-//			if(!set.contains(iterator)){
-//				set.add(iterator);
-//				iterator=iterator.next;
-//			}else{
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
 	
+
 	public boolean hasCycle(ListNode head) {
-		if(head==null||head.next==null){
+		if(head==null||head.next==null) {
 			return false;
 		}
-		ListNode slower=head;
-		ListNode faster=head;
-		while(faster!=null&&faster.next!=null){
-			slower=slower.next;
-			faster=faster.next.next;
-			if(slower==faster){
+		ListNode slow=head;
+		ListNode fast=head;
+		while(fast!=null&&fast.next!=null) {
+			fast=fast.next.next;
+			slow=slow.next;
+			if(slow.equals(slow)) {
 				return true;
 			}
-			
 		}
 		return false;
-	}
+    }
+	
+	
+	
+	
+	
 }
 class ListNode {
 	int val;

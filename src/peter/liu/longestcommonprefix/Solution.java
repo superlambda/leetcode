@@ -23,8 +23,13 @@ public class Solution {
 			while (strs[i].indexOf(lcp) != 0) {
 				minLength--;
 				lcp = strs[0].substring(0, minLength);
+				if(lcp.equals("")) {
+					return lcp;
+				}
 			}
 		}
 		return lcp;
 	}
+	
 }
+	

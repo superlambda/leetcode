@@ -64,6 +64,8 @@ public class Solution {
 						first.next = tail;
 						carryNumber = 0;
 						break;
+						
+						
 					}
 				}
 				first.val += carryNumber;

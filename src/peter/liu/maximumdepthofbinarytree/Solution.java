@@ -12,12 +12,9 @@ package peter.liu.maximumdepthofbinarytree;
 public class Solution {
 	public int maxDepth(TreeNode root) {
 		if(root==null){
-			return 0;
-		}else{
-			int maxLeft=maxDepth(root.left);
-			int maxRight=maxDepth(root.right);
-			return 1+Math.max(maxLeft, maxRight);
-		}
+            return 0;
+        }
+        return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
 	}
 }
 

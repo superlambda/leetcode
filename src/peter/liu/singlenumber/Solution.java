@@ -14,6 +14,9 @@ package peter.liu.singlenumber;
 public class Solution {
 	public int singleNumber(int[] A) {
 		int result = 0; 
+//		Bitwise	bitwise AND	&
+//		Bitwise exclusive OR	^
+//		Bitwise inclusive OR	|
         for (int i : A){
         	result ^= i ; 
         }
