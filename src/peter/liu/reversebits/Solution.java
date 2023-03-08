@@ -1,6 +1,5 @@
 package peter.liu.reversebits;
 
-
 /**
  * Reverse bits of a given 32 bits unsigned integer.
  * 
@@ -20,18 +19,35 @@ package peter.liu.reversebits;
  */
 public class Solution {
 	// you need treat n as an unsigned value
-	public int reverseBits(int n) {
-		char[] charAr=Integer.toBinaryString(n).toCharArray();
-		StringBuffer s=new StringBuffer();
-		for(int i=charAr.length-1;i>=0;i--){
+	public int reverseBitsOld(int n) {
+		char[] charAr = Integer.toBinaryString(n).toCharArray();
+		StringBuffer s = new StringBuffer();
+		for (int i = charAr.length - 1; i >= 0; i--) {
 			s.append(charAr[i]);
 		}
-		int lengthToAdd=32-charAr.length;
-		while(lengthToAdd>0){
+		int lengthToAdd = 32 - charAr.length;
+		while (lengthToAdd > 0) {
 			s.append("0");
 			lengthToAdd--;
 		}
-		return (int)Long.parseLong(s.toString(),2);
+		return (int) Long.parseLong(s.toString(), 2);
 	}
 
+	public int reverseBits(int n) {
+		int reversed = 0;
+		int i = 1;
+		while (i <= 32) {
+			reversed = reversed << 1;
+			reversed += n & 1;
+			n = n >>> 1;
+			i++;
+		}
+		return reversed;
+/*		
+-127~-1
+10000001 -127
+11111111 -1
+10000000 -128
+*/
+	}
 }

@@ -22,7 +22,7 @@ public class Solution {
 			return true;
 		}
 		for (int i = 1; i < charAr.length; i++) {
-			if(stack.isEmpty()){
+			if (stack.isEmpty()) {
 				stack.push(charAr[i]);
 				continue;
 			}
@@ -54,5 +54,40 @@ public class Solution {
 			}
 		}
 		return stack.isEmpty() ? true : false;
+	}
+
+	public boolean isValidNew(String s) {
+		char[] charAr = s.toCharArray();
+		Stack<Character> stack = new Stack<Character>();
+
+		for (int i = 0; i < charAr.length; i++) {
+			if (charAr[i] != ')' && charAr[i] != '}' && charAr[i] != ']') {
+				stack.push(charAr[i]);
+			} else {
+				if (stack.isEmpty()) {
+					return false;
+				}
+
+				switch (charAr[i]) {
+				case ')':
+					if (stack.pop() != '(') {
+						return false;
+					}
+					break;
+				case '}':
+					if (stack.pop() != '{') {
+						return false;
+					}
+					break;
+				case ']':
+					if (stack.pop() != '[') {
+						return false;
+					}
+					break;
+				}
+			}
+		}
+		return stack.isEmpty();
+
 	}
 }

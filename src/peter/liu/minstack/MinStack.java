@@ -1,6 +1,6 @@
 package peter.liu.minstack;
 
-import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * Design a stack that supports push, pop, top, and retrieving the minimum
@@ -14,33 +14,28 @@ import java.util.LinkedList;
  *
  */
 public class MinStack {
-	private LinkedList<Integer> stack = new LinkedList<>();
-	private int min = Integer.MAX_VALUE;
+	private Stack<Integer> stack = new Stack<>();
+	private Stack<Integer> minumStack = new Stack<>();
 
 	public void push(int x) {
-		if (min > x) {
-			min = x;
+		if (minumStack.isEmpty()||minumStack.peek()>=x) {
+			minumStack.push(x);
 		}
-		stack.addFirst(x);
+		stack.push(x);
 	}
 
 	public void pop() {
-		int value = stack.removeFirst();
-		if (value == min) {
-			min = Integer.MAX_VALUE;
-			for (int val : stack) {
-				if (min > val) {
-					min = val;
-				}
-			}
+		int value = stack.pop();
+		if (value == minumStack.peek()) {
+			minumStack.pop();
 		}
 	}
 
 	public int top() {
-		return stack.getFirst();
+		return stack.peek();
 	}
 
 	public int getMin() {
-		return min;
+		return minumStack.peek();
 	}
 }

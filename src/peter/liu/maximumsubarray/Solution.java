@@ -37,6 +37,17 @@ public class Solution {
 	}
 	
 	
+	public  int maxSubArray3(int[] nums) {
+		int maxSoFar=nums[0];
+		int maxEndingHere=nums[0];
+		for(int i=1;i<nums.length;i++) {
+			maxEndingHere = Math.max(maxEndingHere+nums[i], nums[i]);
+			maxSoFar=Math.max(maxEndingHere, maxSoFar);
+		}
+		return maxSoFar;
+	}
+	
+	
 	int divide_conquer(int left,int right,int nums[]){
 		if(left > right){
 		    return Integer.MIN_VALUE;

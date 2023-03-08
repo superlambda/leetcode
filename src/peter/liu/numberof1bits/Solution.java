@@ -16,13 +16,32 @@ package peter.liu.numberof1bits;
  */
 public class Solution {
 	// you need to treat n as an unsigned value
-	public int hammingWeight(int n) {
+//	public int hammingWeight(int n) {
+//		int count=0;
+//		char[] charAr=Integer.toBinaryString(n).toCharArray();
+//		for(int i=0;i<charAr.length;i++){
+//			if(charAr[i]=='1'){
+//				count++;
+//			}
+//		}
+//		return count;
+//	}
+	
+	public int hammingWeightWithBruteForce(int n) {
 		int count=0;
-		char[] charAr=Integer.toBinaryString(n).toCharArray();
-		for(int i=0;i<charAr.length;i++){
-			if(charAr[i]=='1'){
-				count++;
-			}
+		while(n!=0) {
+			count+=n&1;
+			n=n>>>1;
+		}
+		return count;
+	}
+	
+	
+	public int hammingWeightWithBrianKernighan(int n) {
+		int count=0;
+		while(n!=0) {
+			n= n&(n-1);
+			count++;
 		}
 		return count;
 	}
