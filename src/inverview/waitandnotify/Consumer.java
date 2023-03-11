@@ -13,12 +13,15 @@ public class Consumer extends Thread {
     @Override
     public void run() {
         while(true) {
+        	 System.out.println("Current thread holds lock before synchronized: " + Thread.holdsLock(sharedQ));
             synchronized (sharedQ) {
                 //waiting condition - wait until Queue is not empty
                 while (sharedQ.size() == 0) {
                     try {
                         System.out.println("Queue is empty, waiting");
+                        System.out.println("Current thread holds lock: " + Thread.holdsLock(sharedQ));
                         sharedQ.wait();
+                        System.out.println("Current thread holds lock after wait: " + Thread.holdsLock(sharedQ));
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
