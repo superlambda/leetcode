@@ -1,5 +1,18 @@
 /bin/
 /target/
+/.vscode/
+/.idea/
+*.iml
+
+# Python
 __pycache__/
 *.pyc
-.vscode
+
+# macOS
+.DS_Store
+
+# Eclipse / m2e (the project is built with Maven; no IDE metadata in git)
+/.classpath
+/.project
+/.settings/
+/.factorypath
